@@ -1,0 +1,347 @@
+Issue Id,Parent Id,Issue Type,Summary,Description,Epic Link
+2,,Story,"[Setup] As a Developer, I need a complete, one-command local development environment.","Description: This story covers the initial project scaffolding and Docker orchestration to ensure all services can run locally and communicate with each other using a single `docker-compose up` command.
+
+Acceptance Criteria (AC):
+- AC-1: The project is a Git repository with the CCS-specified root structure (`/frontend`, `/backend`, `docker-compose.yml`, etc.).
+- AC-2: `docker-compose up --build` successfully builds and runs all services (frontend, backend, postgres, redis, minio, whisper) without errors.
+- AC-3: All services are accessible on their specified ports (e.g., Frontend: 3000, Backend: 8000, MinIO: 9000).
+- AC-4: The root `.env` and `.env.local` files are present and gitignored, and a complete `.env.template` exists as per the CCS.",ASCEND-1
+3,,Task,Initialize Project Structure & Git Repository,Description: Create the initial Git repository and core project layout.,ASCEND-1
+4,3,Sub-task,Initialize a Git repository with a main branch,,
+5,3,Sub-task,"Create the root .gitignore file, ensuring it includes `.env`, `.env.local`, `node_modules/`, `__pycache__/`, `.DS_Store`, etc.",,
+6,3,Sub-task,Create the root `README.md` with the project title and a brief overview.,,
+7,3,Sub-task,Create the `/frontend` and `/backend` directories as specified in CCS `<DIRECTORY_STRUCTURE>`.,,
+8,3,Sub-task,"Create a root `Makefile` with initial targets for `up`, `down`, `build`, and `logs` to simplify Docker commands.",,
+9,,Task,Create Root `docker-compose.yml`,"Description: Define the orchestration for all services required for local development.
+
+Developer Notes: All service definitions must use environment variables for configuration and mount volumes for persistent data where necessary.",ASCEND-1
+10,9,Sub-task,"Define the `postgres` service using the `postgres:16` image, mapping a volume to `/var/lib/postgresql/data` for persistence and forwarding port 5432.",,
+11,9,Sub-task,Define the `redis` service using the `redis:7` image.,,
+12,9,Sub-task,"Define the `minio` service, including environment variables for root user/password, a volume for data persistence, and port mappings for 9000 (API) and 9001 (Console).",,
+13,9,Sub-task,Define a placeholder `whisper-service` container that will eventually host the transcription model.,,
+14,9,Sub-task,"Define the `backend` service, configured to build from `./backend/Dockerfile`, map port 8000, and set `depends_on` for `postgres` and `redis`.",,
+15,9,Sub-task,"Define the `frontend` service, configured to build from `./frontend/Dockerfile`, map port 3000, and set `depends_on` for `backend`.",,
+16,,Task,Create Environment Variable Templates,"Description: Create the template file that documents all necessary environment variables for the project.
+
+Developer Notes: This file is critical for onboarding and must be a 1:1 match with the CCS `<ENVIRONMENT_VARIABLES>` section.",ASCEND-1
+17,16,Sub-task,Create a root `.env.template` file.,,
+18,16,Sub-task,Copy and paste the complete list of variables from the CCS into `.env.template`.,,
+19,16,Sub-task,"Create a local `.env` file from the template for immediate use, filling in default local values.",,
+20,,Task,Configure MinIO Bucket,"Description: Create a small script or add a command to the `Makefile` to automatically create the required S3 bucket in MinIO on first run.
+
+Developer Notes: MinIO does not create buckets automatically. This prevents a common ""NoSuchBucket"" error during initial setup. Reference `S3_BUCKET_NAME` from the `.env` file.",ASCEND-1
+21,,Story,"[Backend] As a Developer, I need a production-ready FastAPI application structure with a configured database.","Description: Build the core backend application, including its file structure, configurations, database models, and migration strategy, strictly following the CCS.
+
+AC:
+- AC-1: The backend application runs and serves the FastAPI docs UI at `http://localhost:8000/docs`.
+- AC-2: The initial Alembic migration successfully creates all database tables in PostgreSQL.
+- AC-3: Pydantic settings management correctly loads environment variables from the `.env` file.
+- AC-4: A global exception handler is in place to catch unhandled errors and return a standard JSON error response.",ASCEND-1
+22,21,Task,Create Backend Dockerfile and Initial Dependencies,"Description: Define the container environment for the FastAPI application.
+
+Developer Notes: Follow the container security protocols in CCS Section 8.6.4, including creating a non-root user.",
+23,22,Sub-task,Create `/backend/Dockerfile` with a multi-stage build to keep the final image slim.,,
+24,22,Sub-task,"Create `/backend/requirements.txt` and add initial dependencies: `fastapi`, `uvicorn[standard]`, `sqlalchemy[asyncpg]`, `psycopg2-binary`, `pydantic-settings`, `alembic`, `pgvector`.",,
+25,22,Sub-task,"Create a linter configuration file (e.g., `pyproject.toml` for `ruff`) in the `/backend` directory.",,
+26,21,Task,Implement Core Application Structure and Settings,Description: Scaffold the backend directory structure and configure environment variable loading.,
+27,26,Sub-task,Create the complete directory structure inside `/backend/app/` as defined in CCS `<DIRECTORY_STRUCTURE>`.,,
+28,26,Sub-task,Implement settings management in `/app/core/config.py` to load all backend variables using Pydantic `BaseSettings`.,,
+29,26,Sub-task,"In `main.py`, implement a global exception handler to catch any unhandled exceptions and return a `500 Internal Server Error` with a standardized JSON body as per the API contract.",,
+30,21,Task,Implement Database Models and Session Management,"Description: Define all SQLAlchemy ORM models and the async database session factory.
+
+Developer Notes: Each model must correspond exactly to the SQL schema in the CCS.",
+31,30,Sub-task,Configure the asynchronous SQLAlchemy engine and session factory in `/app/db/session.py`.,,
+32,30,Sub-task,Define the `User` model in `/app/db/models/user.py`.,,
+33,30,Sub-task,Define the `Resume` model in `/app/db/models/resume.py`.,,
+34,30,Sub-task,Define the `InterviewSession` model in `/app/db/models/session.py`.,,
+35,30,Sub-task,Define the `Recording` model in `/app/db/models/recording.py`.,,
+36,30,Sub-task,Define the `Feedback` model in `/app/db/models/feedback.py`.,,
+37,30,Sub-task,Define the `KnowledgeBaseChunk` model in `/app/db/models/knowledge_base.py`.,,
+38,21,Task,Set Up Database Migration Strategy with Alembic,"Description: Initialize and configure Alembic to manage all database schema changes.
+
+Developer Notes: Follow the explicit instructions in CCS Section `DATABASE MIGRATION STRATEGY (Alembic)`.",
+39,38,Sub-task,Run `alembic init alembic` inside the `/backend` directory.,,
+40,38,Sub-task,Configure `alembic/env.py` to use the async database URL from `config.py` and target the `Base.metadata`.,,
+41,38,Sub-task,"Run `alembic revision --autogenerate -m ""Initial schema""` to create the first migration file.",,
+42,38,Sub-task,"Review the generated migration file to ensure it matches the CCS schema, then apply it by adding an `entrypoint.sh` script to the backend Dockerfile that runs `alembic upgrade head` before starting the server.",,
+43,,Story,"[Frontend] As a Developer, I need a type-safe Next.js application with foundational UI and state management.","Description: Scaffold the frontend application according to the CCS, ensuring all core libraries are installed and configured for a scalable and maintainable codebase.
+
+AC:
+- AC-1: The Next.js app runs in its Docker container and is accessible at `http://localhost:3000`.
+- AC-2: TypeScript is configured with `strict: true` and `tsc --noEmit` passes without errors.
+- AC-3: The `shadcn/ui` CLI is installed and the initial set of UI components are available.",ASCEND-1
+44,43,Task,Create Frontend Dockerfile and Initialize Project,"Description: Set up the Next.js project and its container environment.
+
+Developer Notes: Follow CCS Section 8.6.4 for container security, including a multi-stage build and a non-root user.",
+45,44,Sub-task,Create `/frontend/Dockerfile`.,,
+46,44,Sub-task,Initialize a Next.js 14 project in `/frontend` using the App Router and TypeScript.,,
+47,44,Sub-task,Create the CCS-specified directory structure inside `/frontend/src/`.,,
+48,44,Sub-task,Configure ESLint and Prettier for code quality and consistent formatting.,,
+49,43,Task,Configure Core Libraries and Tooling,Description: Install and configure all foundational frontend libraries as per the CCS.,
+50,49,Sub-task,"Configure `tsconfig.json` with `""strict"": true` and path aliases.",,
+51,49,Sub-task,"Install and configure Tailwind CSS 3.x, including `tailwind.config.js` and `globals.css` with the specified design tokens.",,
+52,49,Sub-task,Install TanStack Query v5 and set up the `QueryProvider` in `/src/providers/query-provider.tsx`.,,
+53,49,Sub-task,Install Zustand and create the initial UI store in `/src/stores/ui-store.ts`.,,
+54,49,Sub-task,"Install Axios and create the centralized API instance in `/src/lib/api.ts`, including the JWT request interceptor.",,
+55,43,Task,Set Up Base UI Components with shadcn/ui,"Description: Install the core set of UI primitives that will be used throughout the application, as mandated by Directive 9.",
+56,55,Sub-task,Initialize `shadcn/ui` in the frontend project.,,
+57,55,Sub-task,"Run `npx shadcn-ui@latest add` for the following components: `button`, `card`, `input`, `label`, `dialog`, `alert`, `skeleton`, `toast`, `textarea`, `progress`, `avatar`.",,
+58,,Story,"[Auth] As a User, I want to sign up and log in securely using my Google or GitHub account.","Description: Implement the full end-to-end authentication flow, from the frontend UI to backend token validation and user creation.
+
+AC:
+- AC-1: A user can click ""Login with Google/GitHub"" and complete the OAuth flow.
+- AC-2: Upon successful login, a new user is created in the `users` table (or an existing user is retrieved) and the user is redirected to the dashboard.
+- AC-3: A secure, HttpOnly session cookie is set in the browser.
+- AC-4: The frontend can make an authenticated request to a protected backend endpoint (`/auth/verify`), which successfully validates the user and returns their data.",ASCEND-1
+59,58,Task,[Backend] Implement Pydantic Schemas for Authentication,"Description: Create the necessary Pydantic models for user data transfer.
+
+Developer Notes: These must match the `<PYDANTIC_SCHEMAS_SPECIFICATION>` exactly.",
+60,59,Sub-task,"Implement `UserBase`, `UserCreate`, and `UserResponse` in `/app/schemas/user.py`.",,
+61,58,Task,[Backend] Implement JWT Validation and User Retrieval,"Description: Build the core security dependency that will protect all backend routes.
+
+Developer Notes: Reference CCS Section 8.6.3 for the exact implementation pattern to prevent security vulnerabilities.",
+62,61,Sub-task,Implement JWT decoding logic in `/app/core/security.py`.,,
+63,61,Sub-task,Implement the `get_current_user` dependency in `/app/core/auth.py`.,,
+64,58,Task,[Backend] Create User Verification Endpoint,Description: Create the API endpoint that the frontend will use to verify a user's session.,
+65,64,Sub-task,Create the router in `/app/api/v1/auth.py`.,,
+66,64,Sub-task,"Implement the `POST /api/v1/auth/verify` endpoint, protected by `Depends(get_current_user)`, which returns the `UserResponse`.",,
+67,58,Task,[Frontend] Configure NextAuth.js,Description: Set up the NextAuth library to handle the OAuth providers and session management.,
+68,67,Sub-task,Configure NextAuth options in `/src/lib/auth.ts`.,,
+69,67,Sub-task,Implement the NextAuth API route in `/src/app/api/auth/[...nextauth]/route.ts`.,,
+70,67,Sub-task,Configure the Google and GitHub OAuth providers.,,
+71,67,Sub-task,Implement the `jwt` and `session` callbacks to ensure the database user `id` is encoded into the JWT `sub` claim.,,
+72,58,Task,[Frontend] Build Authentication UI and Protected Layouts,Description: Create the user-facing login page and the logic to protect dashboard pages.,
+73,72,Sub-task,"Create a simple login page at `/src/app/(auth)/login/page.tsx` with ""Login with Google"" and ""Login with GitHub"" buttons.",,
+74,72,Sub-task,Create a protected layout at `/src/app/(dashboard)/layout.tsx` that checks for a valid session and redirects to `/login` if unauthenticated.,,
+75,72,Sub-task,Create a placeholder dashboard page at `/src/app/(dashboard)/page.tsx`.,,
+76,58,Task,[Test] Verify End-to-End Authentication Flow,Description: Write automated tests to confirm the entire authentication and session validation process works.,
+77,76,Sub-task,**[Backend]** Write an integration test in `/backend/tests/api/v1/test_auth.py` that uses a mock JWT to call `/auth/verify` and asserts a `200 OK` response.,,
+78,76,Sub-task,**[Backend]** Write a test case for an invalid/expired token that asserts a `401 Unauthorized` response.,,
+80,,Story,"[Resume] As a User, I want to upload my resume and have it processed by the system.","Description: Build the functionality for a user to securely upload a resume file, which is then stored, parsed, and its metadata saved to the database.
+
+AC:
+- AC-1: The user can only upload `.pdf` or `.docx` files under 5MB.
+- AC-2: A successful upload stores the file in MinIO (`resumes/<user_id>/<resume_id>.ext`) and creates a record in the `resumes` table.
+- AC-3: A Celery task is enqueued to parse the text from the uploaded file.
+- AC-4: The UI provides clear feedback for success, failure (with specific error messages), and loading states.",ASCEND-2
+81,80,Task,[Backend] Implement MinIO Storage Service,Description: Create a reusable service for interacting with the S3-compatible object store.,
+82,81,Sub-task,Implement an `S3Service` in `/app/services/storage.py` with methods for `upload_file` and `download_file`.,,
+83,80,Task,[Backend] Implement Resume Upload Endpoint,"Description: Create the API endpoint to handle file uploads.
+
+Developer Notes: Follow CCS Section 8.5.5 for file upload security.",
+84,83,Sub-task,Implement the `POST /api/v1/resumes` endpoint in `/app/api/v1/resumes.py`.,,
+85,83,Sub-task,Implement strict validation for file size and MIME type using the `python-magic` library.,,
+86,83,Sub-task,Use the `S3Service` to upload the validated file to MinIO.,,
+87,83,Sub-task,Create a record in the `resumes` table with `parsing_status: 'pending'`.,,
+88,83,Sub-task,Dispatch a new Celery task `workers.parsing.parse_resume_text(resume_id: str)`.,,
+89,83,Sub-task,Return a `201 Created` with the `ResumeUploadResponse` schema.,,
+90,80,Task,[Celery] Implement Resume Parsing Task,Description: Create the background task to extract text from resume files.,
+91,90,Sub-task,Create `/app/workers/parsing.py` and define the `parse_resume_text` task.,,
+92,90,Sub-task,Add `python-docx` and `pypdf` to `requirements.txt`.,,
+93,90,Sub-task,"In the task, download the file from MinIO, use the appropriate library to extract raw text, and update the `resumes` table.",,
+94,80,Task,[Frontend] Build Resume Upload UI,Description: Create the user interface for uploading a resume.,
+95,94,Sub-task,Create a dedicated upload page at `/src/app/(dashboard)/upload/page.tsx`.,,
+96,94,Sub-task,"Build a form using `shadcn/ui` `Input type=""file""` and `Button` components.",,
+97,94,Sub-task,Create a `useUploadResume` mutation hook in `/src/hooks/use-upload.ts` using TanStack Query.,,
+98,94,Sub-task,"Implement UI feedback for loading, success (using a toast), and specific error states.",,
+99,80,Task,[Test] Write Tests for Resume Upload,Description: Create backend tests to validate the entire resume upload and parsing flow.,
+100,99,Sub-task,"**[Backend]** Test the `/api/v1/resumes` endpoint with a valid file upload, asserting a `201` response and that a Celery task was enqueued.",,
+101,99,Sub-task,"**[Backend]** Test the endpoint with an oversized file, asserting a `413 Payload Too Large` response.",,
+102,99,Sub-task,"**[Backend]** Test the endpoint with an invalid file type (e.g., `.txt`), asserting a `400 Bad Request` response.",,
+103,,Story,"[Session] As a User, I want to start an interview session by providing a job description.","Description: Create the workflow to initiate an interview session, which is an asynchronous process that eventually leads to a set of generated questions.
+
+AC:
+- AC-1: A user can submit a job description (50-5000 chars) and a selected resume ID.
+- AC-2: The backend immediately returns a `202 Accepted` response with a `session_id`.
+- AC-3: A new record is created in the `interview_sessions` table with `status: 'processing'`.
+- AC-4: The `workers.session.generate_interview_questions` Celery task is successfully enqueued.",ASCEND-2
+104,103,Task,[Backend] Implement Session Creation Endpoint,"Description: Create the API endpoint to kick off the session generation workflow.
+
+Developer Notes: This endpoint must be fast and delegate the heavy work to Celery.",
+105,104,Sub-task,Implement the `POST /api/v1/sessions` endpoint in `/app/api/v1/sessions.py`.,,
+106,104,Sub-task,Use the `SessionCreateRequest` Pydantic schema for validation.,,
+107,104,Sub-task,Perform an **authorization check** to ensure the `resume_id` belongs to the `current_user`.,,
+108,104,Sub-task,Create the `interview_sessions` record in the database.,,
+109,104,Sub-task,Dispatch the Celery task with the new `session_id`.,,
+110,104,Sub-task,Return the `202 Accepted` response using the `SessionCreateResponse` schema.,,
+111,103,Task,[Backend] Implement Session Status Polling Endpoint,Description: Create an endpoint for the frontend to check the status of a session.,
+112,111,Sub-task,Implement the `GET /api/v1/sessions/{session_id}` endpoint.,,
+113,111,Sub-task,**[Security]** Implement an authorization check to ensure the session belongs to the current user.,,
+114,111,Sub-task,Return the full session details using the `SessionDetailResponse` schema.,,
+115,103,Task,[Frontend] Enhance UI for Session Creation and Polling,Description: Add the job description input and handle the redirection and polling logic.,
+116,115,Sub-task,Add a `Textarea` for the job description to the upload page.,,
+117,115,Sub-task,Create a `useCreateSession` mutation hook.,,
+118,115,Sub-task,"Upon successful mutation, redirect the user to `/sessions/[sessionId]`.",,
+119,115,Sub-task,"On the `sessions/[sessionId]` page, use `useQuery` with a `refetchInterval` to poll the status endpoint.",,
+120,115,Sub-task,Display a skeleton loader while the session status is `processing`.,,
+121,103,Task,[Test] Write Tests for Session Creation,Description: Create backend tests to validate the session creation logic.,
+122,121,Sub-task,"**[Backend]** Test the `POST /api/v1/sessions` endpoint with a valid request, asserting a `202` response.",,
+123,121,Sub-task,"**[Backend]** Test the same endpoint with a `resume_id` belonging to a different user, asserting a `403 Forbidden` response.",,
+124,121,Sub-task,"**[Backend]** Test the `GET /api/v1/sessions/{session_id}` endpoint, asserting a `200 OK` and the correct data shape.",,
+126,,Story,"[RAG] As the System, I need a reliable knowledge base to provide evidence-backed feedback.","Description: Populate the PostgreSQL vector store with expert knowledge from Markdown files to ground the AI's responses.
+
+AC:
+- AC-1: The seeding script can be run to populate the `knowledge_base_chunks` table.
+- AC-2: Each row in the table contains the source document, chunked text, and a 768-dimension embedding vector.
+- AC-3: The `--reset` flag successfully truncates the table before seeding.",ASCEND-3
+127,126,Task,[Content] Create Knowledge Base Source Files,"Description: Create the initial Markdown files that will serve as the RAG knowledge base.
+
+Developer Notes: Files must be placed in `/backend/knowledge_base_docs/`.",
+128,127,Sub-task,Create `star_method.md`.,,
+129,127,Sub-task,Create `resume_best_practices.md`.,,
+130,127,Sub-task,Create `behavioral_questions.md`.,,
+131,127,Sub-task,Create `communication_guide.md`.,,
+132,127,Sub-task,Create `system_design_principles.md`.,,
+133,126,Task,[AI/Backend] Implement Embedding Generation Service,Description: Create the service responsible for converting text to vector embeddings.,
+134,133,Sub-task,Add `sentence-transformers` to `requirements.txt`.,,
+135,133,Sub-task,Implement the `EmbeddingService` in `/app/services/embedding.py` to load and use the `sentence-transformers/all-mpnet-base-v2` model.,,
+136,126,Task,[AI/Backend] Implement Knowledge Base Seeding Script,"Description: Create the script to process the Markdown files and populate the vector DB.
+
+Developer Notes: Follow the implementation guide in the CCS.",
+137,136,Sub-task,Implement the script at `/backend/scripts/seed_knowledge_base.py`.,,
+138,136,Sub-task,Use a token-based text splitter to chunk documents to 512 tokens with a 50-token overlap.,,
+139,136,Sub-task,"Loop through chunks, generate embeddings, and insert them into the `knowledge_base_chunks` table.",,
+140,,Story,"[LLM] As a Developer, I need a swappable LLM provider architecture.","Description: Implement the specified Provider/Interface pattern to allow switching between a local self-hosted LLM and the OpenAI API.
+
+AC:
+- AC-1: The `LLMProvider` abstract base class is defined exactly as in the CCS.
+- AC-2: `LocalLLMProvider` and `OpenAIProvider` both implement all methods of the ABC.
+- AC-3: The application correctly instantiates one of the providers based on the `LLM_PROVIDER` environment variable.",ASCEND-3
+141,140,Task,[AI/Backend] Implement LLM Provider Interface and Implementations,Description: Create the modular architecture for interacting with LLMs.,
+142,141,Sub-task,Define the `LLMProvider` ABC in `/app/services/llm/base.py`.,,
+143,141,Sub-task,Implement `LocalLLMProvider` in `/app/services/llm/local.py` using `httpx`.,,
+144,141,Sub-task,Implement `OpenAIProvider` in `/app/services/llm/openai.py` using the `openai` library.,,
+145,141,Sub-task,Implement retry logic with exponential backoff for both providers.,,
+146,141,Sub-task,Create a factory function in `/app/services/llm/__init__.py` to select the provider based on the environment variable.,,
+147,,Story,"[Agent] As the System, I need a ReAct agent to intelligently generate interview questions.","Description: Create the LangChain ReAct agent and its tools, and integrate it into the session creation Celery task.
+
+AC:
+- AC-1: All specified agent tools are implemented and function correctly.
+- AC-2: The `generate_interview_questions` task successfully uses the agent to generate 5-8 relevant questions.
+- AC-3: The generated questions are saved to the `interview_sessions` table, and the session status is updated to `complete`.",ASCEND-3
+148,147,Task,[AI/Backend] Implement Agent Tools,Description: Create the functions that the agent will use to gather information.,
+149,148,Sub-task,Implement `get_resume_text` in `/app/services/agent.py`.,,
+150,148,Sub-task,Implement `get_job_description_text`.,,
+151,148,Sub-task,Implement `rag_knowledge_search` to perform a vector similarity search.,,
+152,148,Sub-task,Create placeholder implementations for `get_transcript` and `analyze_delivery_metrics`.,,
+153,147,Task,[AI/Backend] Implement Agent Factory and Celery Task Logic,Description: Integrate the agent into the background task for question generation.,
+154,153,Sub-task,Implement the agent factory function in `/app/services/agent.py`.,,
+155,153,Sub-task,Upgrade the `workers.session.generate_interview_questions` task in `/app/workers/session.py` to invoke the agent.,,
+156,153,Sub-task,"Parse the agent's response, validate it, and update the `interview_sessions` record, setting the status to `complete`.",,
+157,147,Task,[Test] Write Tests for Question Generation,Description: Test the Celery task and agent logic.,
+158,157,Sub-task,"**[Backend]** Write a unit test for the `generate_interview_questions` task, mocking the agent and its response to ensure the database is updated correctly.",,
+160,,Story,"[Recording] As a User, I want a seamless in-browser experience to record my answers.","Description: Build the frontend UI and logic for recording audio and uploading it for processing.
+
+AC:
+- AC-1: The session page displays one question at a time from the `generated_questions`.
+- AC-2: The user can start, stop, and re-record their audio answer.
+- AC-3: After confirming, the audio file is uploaded, a `recordings` entry is created, and the transcription task is triggered.
+- AC-4: The UI shows a ""processing"" state for the submitted answer.",ASCEND-4
+161,160,Task,[Frontend] Build the Interview Interface,Description: Create the page where the user practices their interview.,
+162,161,Sub-task,Build the UI in `/src/app/(dashboard)/sessions/[sessionId]/page.tsx`.,,
+163,161,Sub-task,Implement state management to track the current question and recording state.,,
+164,161,Sub-task,Create a recording component in `/src/components/features/recording/` using the `MediaRecorder` API.,,
+165,160,Task,[Backend] Implement Recording Submission Endpoint,Description: Create the endpoint to handle the audio upload.,
+166,165,Sub-task,Implement `POST /api/v1/sessions/{session_id}/recordings` in `/app/api/v1/sessions.py`.,,
+167,165,Sub-task,Validate the audio file size and type.,,
+168,165,Sub-task,Upload the audio to MinIO.,,
+169,165,Sub-task,Create the `recordings` table entry with `transcription_status: 'pending'`.,,
+170,165,Sub-task,Dispatch the `workers.transcription.process_recording` task.,,
+171,,Story,"[Transcription] As the System, I need to accurately transcribe user audio using a self-hosted service.","Description: Set up the Whisper microservice and create the Celery task that orchestrates the transcription process.
+
+AC:
+- AC-1: The `whisper.cpp` service is containerized and accessible from the Celery worker.
+- AC-2: The `process_recording` task successfully downloads the audio, gets a transcript, and updates the database.
+- AC-3: The `workers.feedback.generate_feedback_report` task is enqueued upon successful transcription.",ASCEND-4
+172,171,Task,[DevOps] Configure Whisper Microservice,Description: Add the pre-built `whisper.cpp` container to the Docker Compose setup.,
+173,172,Sub-task,Add the `whisper.cpp` service to `docker-compose.yml` and configure the `WHISPER_SERVICE_URL`.,,
+174,171,Task,[Celery] Implement Transcription Task,Description: Create the background task to handle audio transcription.,
+175,174,Sub-task,Implement the `workers.transcription.process_recording` task in `/app/workers/transcription.py`.,,
+176,174,Sub-task,Download the audio file from MinIO.,,
+177,174,Sub-task,Make an async POST request to the Whisper service.,,
+178,174,Sub-task,Update the `recordings` table with the transcript and set `transcription_status` to `complete`.,,
+179,174,Sub-task,Chain the `generate_feedback_report` task.,,
+181,,Story,"[Feedback] As the System, I need to generate a comprehensive, structured feedback report using the ReAct agent.","Description: Implement the final, most complex Celery task which uses the agent to analyze the transcript and generate the full `FeedbackReport`.
+
+AC:
+- AC-1: The `analyze_delivery_metrics` tool is fully implemented with the CCS-specified scoring logic.
+- AC-2: The `generate_feedback_report` task uses the agent with the precise `AGENT_SYSTEM_PROMPT_SPECIFICATION`.
+- AC-3: The agent's final JSON output successfully parses into the `FeedbackReport` Pydantic schema.
+- AC-4: The report is saved to the `feedback` table, and the `recording`/`session` statuses are updated to `complete`.",ASCEND-5
+182,181,Task,[AI/Backend] Fully Implement Agent Tools and Pydantic Schemas,Description: Complete the implementation of all agent tools and feedback-related data models.,
+183,182,Sub-task,Fully implement the `analyze_delivery_metrics` agent tool in `/app/services/agent.py`.,,
+184,182,Sub-task,"Implement all feedback-related Pydantic schemas (`STARAnalysis`, `DeliveryMetrics`, `FeedbackReport`) in `/app/schemas/feedback.py`.",,
+185,181,Task,[Celery] Implement Feedback Generation Task,Description: Create the background task that generates the AI feedback.,
+186,185,Sub-task,Implement the `workers.feedback.generate_feedback_report` task in `/app/workers/feedback.py`.,,
+187,185,Sub-task,Initialize the ReAct agent with the specified system prompt from the CCS.,,
+188,185,Sub-task,"Invoke the agent, parse its JSON output into the `FeedbackReport` model.",,
+189,185,Sub-task,Insert the new `Feedback` record into the database.,,
+190,185,Sub-task,Implement the logic to update the parent `interview_sessions` status to `complete` if all recordings are done.,,
+191,,Story,"[UI] As a User, I want to view my feedback report in a clear, actionable, and visually appealing format.","Description: Build the frontend components to render the structured feedback data received from the API.
+
+AC:
+- AC-1: The session page dynamically displays the feedback report once the session status is `complete`.
+- AC-2: All sections of the report (STAR, Delivery, Recommendations, Overall Score) are displayed.
+- AC-3: Numerical scores are presented with intuitive visualizations.",ASCEND-5
+192,191,Task,[Backend] Enhance Session and Recording Endpoints,Description: Ensure the API endpoints correctly join and serialize the full feedback data.,
+193,192,Sub-task,Implement the `GET /api/v1/recordings/{recording_id}` endpoint.,,
+194,192,Sub-task,Update the `GET /sessions/{session_id}` endpoint to correctly join and return all nested recording and feedback data.,,
+195,191,Task,[Frontend] Create Feedback Display Components,"Description: Build the UI components to render the feedback report.
+
+Developer Notes: Follow Directive 9 for UI/UX consistency.",
+196,195,Sub-task,Create a main `FeedbackReport` component in `/src/components/features/session/`.,,
+197,195,Sub-task,Create a `DeliveryMetrics` sub-component that uses `shadcn/ui` `Progress` bars or a simple charting library to visualize scores.,,
+198,195,Sub-task,"Integrate the `FeedbackReport` component into the `sessions/[sessionId]` page, conditionally rendering it when the data is available.",,
+200,,Story,"[UX/UI] As a User, I expect a polished, responsive, and error-free experience.","Description: Address all aspects of the user-facing experience, from loading states to error handling and visual consistency.
+
+AC:
+- AC-1: Every data-fetching view has a clear loading state (e.g., skeleton loaders).
+- AC-2: All user actions that trigger an API call provide immediate feedback.
+- AC-3: The application is fully responsive and usable on mobile devices.",ASCEND-6
+201,200,Task,[Frontend] Implement Consistent Loading and Error States,Description: Ensure the user is never left with a blank or unresponsive screen.,
+202,201,Sub-task,"Implement skeleton loading components for the main dashboard, session page, and feedback report.",,
+203,201,Sub-task,"Implement a global toast notification system using `shadcn/ui` `Toast` for displaying user feedback (e.g., ""Upload successful,"" ""Error creating session"").",,
+204,201,Sub-task,"Create a generic ""empty state"" component for when there are no sessions or recordings to display.",,
+205,200,Task,[Frontend] Build Main Dashboard and Finalize Layout,Description: Create the central hub for the user and ensure a consistent layout across the app.,
+206,205,Sub-task,Build the main dashboard page at `/src/app/(dashboard)/page.tsx` to list and link to past interview sessions using `Card` components.,,
+207,205,Sub-task,Create a consistent header and navigation component to be used across all authenticated pages.,,
+208,,Story,"[DevOps] As a Developer, I need an automated CI/CD pipeline to ensure code quality.","Description: Create GitHub Actions workflows to automate linting, testing, and build processes.
+
+AC:
+- AC-1: A push or pull request to any branch triggers the linting and testing workflows.
+- AC-2: A failing test or linting error causes the workflow to fail, blocking merges.",ASCEND-6
+209,208,Task,[DevOps] Create Backend CI Workflow,Description: Automate quality checks for the FastAPI application.,
+210,209,Sub-task,Create `.github/workflows/backend-ci.yml`.,,
+211,209,Sub-task,Add a job to run `ruff check` and `ruff format --check`.,,
+212,209,Sub-task,Add a job to run `pytest` against a test database service defined in the workflow.,,
+213,208,Task,[DevOps] Create Frontend CI Workflow,Description: Automate quality checks for the Next.js application.,
+214,213,Sub-task,Create `.github/workflows/frontend-ci.yml`.,,
+215,213,Sub-task,Add a job to run ESLint and Prettier (or `ruff`).,,
+216,213,Sub-task,Add a job to run `tsc --noEmit` to verify TypeScript types.,,
+217,213,Sub-task,Add a job to run unit tests with Jest/RTL.,,
+218,,Story,"[Test] As a Developer, I must ensure the application's core logic is reliable.","Description: Write a suite of unit and integration tests to cover critical application functionality and achieve the coverage goals set in the CCS.
+
+AC:
+- AC-1: Backend test coverage meets or exceeds 80%.
+- AC-2: Frontend test coverage meets or exceeds 70%.
+- AC-3: All critical user flows (auth, upload, session creation) are covered by integration tests.",ASCEND-6
+219,218,Task,[Backend] Write Comprehensive Integration Tests,Description: Test the behavior of all API endpoints.,
+220,219,Sub-task,"Write integration tests for the `auth`, `resumes`, and `sessions` API routers, using an async test client and a dedicated test database.",,
+221,219,Sub-task,"Include tests for authorization failures (e.g., trying to access another user's resources).",,
+222,218,Task,[Frontend] Write Unit and Component Tests,Description: Test critical frontend logic and components.,
+223,222,Sub-task,"Write unit tests for the state management and API hooks (`use-session.ts`, `use-upload.ts`).",,
+224,222,Sub-task,"Write component tests for the `FeedbackReport` and `Recording` components, mocking the data they receive.",,
+225,,Story,"[Launch] As the Project Owner, I need to prepare all materials for a successful portfolio launch.","Description: Finalize all public-facing documentation and marketing content.
+
+AC:
+- AC-1: The `README.md` is complete and provides clear instructions for setting up and running the project locally.
+- AC-2: A detailed technical blog post is drafted.
+- AC-3: A collection of high-quality screenshots and a short demo video are created.",ASCEND-6
+226,225,Task,[Documentation] Finalize Project Documentation,Description: Thoroughly document the project in the root `README.md`.,
+227,226,Sub-task,Add an architecture overview diagram or description.,,
+228,226,Sub-task,Detail the full tech stack.,,
+229,226,Sub-task,"Provide step-by-step instructions for local setup, including prerequisites.",,
+230,225,Task,[Content] Create Launch Marketing Materials,Description: Prepare the content as described in the Blueprint's Go-to-Market strategy.,
+231,230,Sub-task,Write the full draft of the technical blog post.,,
+232,230,Sub-task,Record a concise (2-3 minute) video demonstrating the full user journey from upload to feedback.,,
+233,230,Sub-task,"Take high-quality screenshots of the key UI elements (Dashboard, Upload, Session, Feedback Report).",,
