@@ -48,6 +48,9 @@ cp .env.template .env
 # Build and start all services
 make build
 
+# Initialize MinIO bucket (first time only)
+make init-minio
+
 # View logs
 make logs
 
@@ -58,10 +61,11 @@ make down
 ### Available Make Commands
 
 ```bash
-make up      # Start all services
-make down    # Stop all services
-make build   # Build and start services
-make logs    # View service logs
+make up         # Start all services
+make down       # Stop all services
+make build      # Build and start services
+make logs       # View service logs
+make init-minio # Initialize MinIO bucket (run after first 'make up')
 ```
 
 ## Project Structure
