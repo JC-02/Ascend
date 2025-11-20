@@ -1,19 +1,25 @@
 # ============================================
-# Ascend AI - FastAPI Application
+# Ascend AI - FastAPI Application Entry Point
 # ============================================
-# Main application entry point
-# Follows CCS specifications for FastAPI backend
+# Main application configuration and setup
+# Follows CCS API contract specification
 # ============================================
 
+import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request, status
-from fastapi.exceptions import RequestValidationError
-from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from pydantic import ValidationError
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
+logger = logging.getLogger(__name__)
 
 
 # ============================================
@@ -26,23 +32,23 @@ async def lifespan(app: FastAPI):
     Handles startup and shutdown events.
     """
     # Startup
-    print("🚀 Starting Ascend AI Backend...")
-    print(f"   Environment: {settings.environment}")
-    print(f"   Debug Mode: {settings.debug}")
-    print(f"   LLM Provider: {settings.llm_provider}")
+    logger.info("🚀 Starting Ascend AI Backend...")
+    logger.info(f"   Environment: {settings.environment}")
+    logger.info(f"   Debug Mode: {settings.debug}")
+    logger.info(f"   LLM Provider: {settings.llm_provider}")
 
     # Validate configuration on startup
     try:
         _ = settings.database_url
-        print("✓ Configuration validated successfully")
-    except ValidationError as e:
-        print(f"❌ CRITICAL ERROR: Invalid configuration:\n{e}")
+        logger.info("✓ Configuration validated successfully")
+    except Exception as e:
+        logger.error(f"❌ CRITICAL ERROR: Invalid configuration:\n{e}")
         raise
 
     yield
 
     # Shutdown
-    print("👋 Shutting down Ascend AI Backend...")
+    logger.info("👋 Shutting down Ascend AI Backend...")
 
 
 # ============================================
@@ -50,73 +56,53 @@ async def lifespan(app: FastAPI):
 # ============================================
 app = FastAPI(
     title="Ascend AI API",
-    description="Privacy-first AI career coaching platform",
-    version="0.1.0",
+    version="1.0.0",
+    description="Privacy-First AI Career Coaching Platform",
     docs_url="/docs",
     redoc_url="/redoc",
     lifespan=lifespan,
 )
 
 # ============================================
-# CORS Middleware
+# CORS Configuration
 # ============================================
-# Configure CORS with explicit origins per Directive 8.6.1
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins,
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH"],
-    allow_headers=["Authorization", "Content-Type"],
-    max_age=3600,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 
 # ============================================
-# Global Exception Handlers
+# Global Exception Handler
 # ============================================
-@app.exception_handler(RequestValidationError)
-async def validation_exception_handler(request: Request, exc: RequestValidationError):
-    """
-    Handle Pydantic validation errors with user-friendly messages.
-    Per Directive 9.8: Never show technical error messages to users.
-    """
-    return JSONResponse(
-        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-        content={
-            "error": "Validation Error",
-            "message": "The request data is invalid. Please check your input.",
-            "details": exc.errors(),
-        },
-    )
-
-
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
     """
-    Global exception handler for all unhandled exceptions.
-    Per Task 1.2.2 AC-4: Return standardized JSON error response.
+    Global exception handler for unhandled errors.
+    Returns standardized error response per CCS API contract.
+
+    Args:
+        request: The incoming request that caused the exception
+        exc: The exception that was raised
+
+    Returns:
+        JSONResponse with 500 status and error details
     """
-    # Log the error (in production, use proper logging)
-    print(f"❌ Unhandled exception: {type(exc).__name__}: {str(exc)}")
+    logger.error(
+        f"Unhandled exception on {request.method} {request.url.path}: {exc}",
+        exc_info=True
+    )
 
-    # Don't expose internal errors in production
-    if settings.environment == "production":
-        return JSONResponse(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content={
-                "error": "Internal Server Error",
-                "message": "An unexpected error occurred. Please try again later.",
-            },
-        )
-
-    # In development, provide more details
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         content={
-            "error": "Internal Server Error",
-            "message": str(exc),
-            "type": type(exc).__name__,
-        },
+            "detail": "Internal server error",
+            "error_type": "InternalServerError",
+            "path": str(request.url.path)
+        }
     )
 
 
@@ -126,13 +112,19 @@ async def global_exception_handler(request: Request, exc: Exception):
 @app.get("/health", tags=["Health"])
 async def health_check():
     """
-    Health check endpoint for Docker health checks and monitoring.
-    Returns 200 OK if the application is running.
+    Health check endpoint for Docker and monitoring.
+
+    Returns basic system status without database connection check.
+    Used by Docker Compose health checks and load balancers.
+
+    Returns:
+        dict: Status information including environment and version
     """
     return {
         "status": "healthy",
+        "service": "ascend-api",
         "environment": settings.environment,
-        "version": "0.1.0",
+        "version": "1.0.0"
     }
 
 
@@ -142,19 +134,14 @@ async def health_check():
 @app.get("/", tags=["Root"])
 async def root():
     """
-    Root endpoint with API information.
+    Root endpoint - API information.
+
+    Returns:
+        dict: Basic API information and links
     """
     return {
-        "message": "Welcome to Ascend AI API",
-        "version": "0.1.0",
+        "message": "Ascend AI API",
+        "version": "1.0.0",
         "docs": "/docs",
-        "health": "/health",
+        "health": "/health"
     }
-
-
-# ============================================
-# API Router Registration
-# ============================================
-# TODO: Register API routers here in future tasks
-# from app.api.v1 import api_router
-# app.include_router(api_router, prefix="/api/v1")
