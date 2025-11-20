@@ -5,6 +5,8 @@
 # Follows CCS database schema specification
 # ============================================
 
+import uuid
+
 from sqlalchemy import CheckConstraint, ForeignKey, Integer, String, Text
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -30,10 +32,10 @@ class InterviewSession(Base, UUIDMixin, TimestampMixin):
 
     __tablename__ = "interview_sessions"
 
-    user_id: Mapped[UUID] = mapped_column(
+    user_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
     )
-    resume_id: Mapped[UUID | None] = mapped_column(
+    resume_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True), ForeignKey("resumes.id", ondelete="SET NULL"), nullable=True
     )
     job_description: Mapped[str] = mapped_column(Text, nullable=False)
