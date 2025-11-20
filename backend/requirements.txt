@@ -1,0 +1,61 @@
+# ============================================
+# Ascend AI - Backend Dependencies
+# ============================================
+# Python dependencies for FastAPI backend
+# All versions pinned per Directive 8.4
+# ============================================
+
+# ============================================
+# Web Framework
+# ============================================
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+python-multipart==0.0.6  # For file uploads
+
+# ============================================
+# Database
+# ============================================
+sqlalchemy[asyncio]==2.0.23
+asyncpg==0.29.0  # Async PostgreSQL driver
+alembic==1.12.1  # Database migrations
+pgvector==0.2.3  # Vector similarity search
+
+# ============================================
+# Data Validation
+# ============================================
+pydantic==2.5.0
+pydantic-settings==2.1.0  # Environment variable management
+email-validator==2.1.0  # Email validation for Pydantic
+
+# ============================================
+# Security
+# ============================================
+python-jose[cryptography]==3.3.0  # JWT tokens
+passlib[bcrypt]==1.7.4  # Password hashing
+python-magic==0.4.27  # File type validation
+
+# ============================================
+# HTTP Client
+# ============================================
+httpx==0.25.1  # Async HTTP client for LLM providers
+
+# ============================================
+# Background Tasks
+# ============================================
+celery==5.3.4
+redis==5.0.1  # Redis client for Celery
+
+# ============================================
+# Object Storage
+# ============================================
+boto3==1.29.7  # AWS S3 / MinIO client
+botocore==1.32.7
+
+# ============================================
+# Development Tools
+# ============================================
+ruff==0.1.6  # Linter and formatter
+pytest==7.4.3  # Testing framework
+pytest-asyncio==0.21.1  # Async test support
+pytest-cov==4.1.0  # Code coverage
+httpx==0.25.1  # For testing FastAPI endpoints
