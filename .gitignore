@@ -98,3 +98,6 @@ dmypy.json
 # MacOS
 .AppleDouble
 .LSOverride
+
+# claude ai assistant
+.claude/
