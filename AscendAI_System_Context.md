@@ -1495,9 +1495,11 @@ Before adding ANY new dependency, you MUST STOP and provide a **Dependency Secur
 **Proposed Dependency Addition**
 
 **A. Dependency Information:**
-<!-- Section: Package Metadata -->
+<-- Section: Package Metadata -->
 - **Name:** <package-name>
-- **Version:** <exact-version> (e.g., 2.31.0, NOT >=2.0)
+- **Version:** Latest stable version with flexible range (e.g., ^2.31.0 for npm, >=2.31.0 for pip)
+- **Versioning Strategy:** Use caret (^) for npm to allow minor/patch updates, use >= for Python to allow updates within major version
+- **Security Note:** Always use latest stable versions to ensure security patches are applied
 - **Package Manager:** pip | npm
 - **License:** <license-type> (e.g., MIT, Apache-2.0, GPL-3.0)
 
@@ -1769,18 +1771,20 @@ ALL dependencies MUST use exact version pinning:
 ✅ **CORRECT:**
 ```txt
 # backend/requirements.txt
-fastapi==0.104.1
-pydantic==2.5.0
-sqlalchemy==2.0.23
+# Note: Use latest stable versions, update regularly for security patches
+fastapi>=0.104.1
+pydantic>=2.5.0
+sqlalchemy>=2.0.23
 ```
 
 ```json
 // frontend/package.json
+// Note: Use caret (^) for automatic minor/patch updates
 {
   "dependencies": {
-    "next": "14.0.4",
-    "react": "18.2.0",
-    "@tanstack/react-query": "5.8.4"
+    "next": "^14.2.0",
+    "react": "^18.2.0",
+    "@tanstack/react-query": "^5.8.4"
   }
 }
 ```
@@ -6119,9 +6123,10 @@ This section defines the EXACT versions and configurations for all technologies.
 
 ### FRONTEND STACK
 
-**Framework: Next.js 14.x**
+**Framework: Next.js**
 <!-- Technology: Next.js -->
-- **Version:** 14.0.4 (exact pinned version)
+- **Version:** Latest stable version (14.x or higher)
+- **Note:** Always use the most recent stable release to ensure security patches and latest features
 - **Architecture:** App Router (NOT Pages Router)
 - **Rendering Strategy:**
   - Server-side rendering (SSR) for initial page loads
@@ -6130,9 +6135,10 @@ This section defines the EXACT versions and configurations for all technologies.
 - **File Structure:** All routes in `/src/app/` directory
 - **API Routes:** `/src/app/api/` for backend proxy or NextAuth routes only
 
-**Language: TypeScript 5.x**
+**Language: TypeScript**
 <!-- Technology: TypeScript -->
-- **Version:** 5.3.3 (exact pinned version)
+- **Version:** Latest stable version (5.x or higher)
+- **Note:** Always use the most recent stable release for best type safety and IDE support
 - **Configuration (tsconfig.json):**
   ```json
   {
@@ -6155,9 +6161,10 @@ This section defines the EXACT versions and configurations for all technologies.
   }
   ```
 
-**Styling: Tailwind CSS 3.x**
+**Styling: Tailwind CSS**
 <!-- Technology: Tailwind CSS -->
-- **Version:** 3.4.1 (exact pinned version)
+- **Version:** Latest stable version (3.x or higher)
+- **Note:** Always use the most recent stable release for latest utility classes and optimizations
 - **Configuration (tailwind.config.js):**
   ```javascript
   module.exports = {
@@ -6261,7 +6268,8 @@ This section defines the EXACT versions and configurations for all technologies.
 
 **Framework: FastAPI**
 <!-- Technology: FastAPI -->
-- **Version:** 0.104.1 (exact pinned version)
+- **Version:** Latest stable version (0.1xx.x or higher)
+- **Note:** Always use the most recent stable release for security patches and performance improvements
 - **Web Server:** Uvicorn (ASGI server)
 - **Production Server:** Gunicorn managing multiple Uvicorn workers
 - **Middleware:**
