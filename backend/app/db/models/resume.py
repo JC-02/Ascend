@@ -5,6 +5,9 @@
 # Follows CCS database schema specification
 # ============================================
 
+import uuid
+from datetime import datetime
+
 from sqlalchemy import CheckConstraint, ForeignKey, Integer, String, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -30,7 +33,7 @@ class Resume(Base, UUIDMixin):
 
     __tablename__ = "resumes"
 
-    user_id: Mapped[UUID] = mapped_column(
+    user_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
     )
     storage_path: Mapped[str] = mapped_column(Text, nullable=False)
@@ -41,7 +44,9 @@ class Resume(Base, UUIDMixin):
     parsing_status: Mapped[str] = mapped_column(
         String(50), nullable=False, default="pending"
     )
-    created_at: Mapped[str] = mapped_column(String, nullable=False, server_default="NOW()")
+    created_at: Mapped[datetime] = mapped_column(
+        String, nullable=False, server_default="NOW()"
+    )
 
     # Relationships
     user: Mapped["User"] = relationship("User", back_populates="resumes")
