@@ -7,6 +7,7 @@
 
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from typing import List
 
 
 class Settings(BaseSettings):
@@ -16,9 +17,19 @@ class Settings(BaseSettings):
     """
 
     # ============================================
+    # Application Settings
+    # ============================================
+    environment: str = Field(default="development", validation_alias="ENVIRONMENT")
+    debug: bool = Field(default=True, validation_alias="DEBUG")
+    log_level: str = Field(default="INFO", validation_alias="LOG_LEVEL")
+
+    # ============================================
     # Database Configuration
     # ============================================
     database_url: str = Field(..., validation_alias="DATABASE_URL")
+    postgres_user: str = Field(default="postgres", validation_alias="POSTGRES_USER")
+    postgres_password: str = Field(default="postgres", validation_alias="POSTGRES_PASSWORD")
+    postgres_db: str = Field(default="ascend_db", validation_alias="POSTGRES_DB")
 
     # ============================================
     # Redis Configuration
@@ -29,6 +40,11 @@ class Settings(BaseSettings):
     # Authentication
     # ============================================
     nextauth_secret: str = Field(..., min_length=32, validation_alias="NEXTAUTH_SECRET")
+    nextauth_url: str = Field(default="http://localhost:3000", validation_alias="NEXTAUTH_URL")
+    google_client_id: str = Field(..., validation_alias="GOOGLE_CLIENT_ID")
+    google_client_secret: str = Field(..., validation_alias="GOOGLE_CLIENT_SECRET")
+    github_client_id: str = Field(..., validation_alias="GITHUB_CLIENT_ID")
+    github_client_secret: str = Field(..., validation_alias="GITHUB_CLIENT_SECRET")
 
     @field_validator("nextauth_secret")
     @classmethod
@@ -87,24 +103,14 @@ class Settings(BaseSettings):
     # ============================================
     # CORS Configuration
     # ============================================
-    cors_origins: list[str] = Field(
-        default=["http://localhost:3000"], validation_alias="CORS_ORIGINS"
+    cors_origins: str = Field(
+        default="http://localhost:3000,http://localhost:8000", validation_alias="CORS_ORIGINS"
     )
 
-    @field_validator("cors_origins", mode="before")
-    @classmethod
-    def parse_cors_origins(cls, v):
-        """Parse comma-separated CORS origins from environment variable."""
-        if isinstance(v, str):
-            return [origin.strip() for origin in v.split(",")]
-        return v
-
-    # ============================================
-    # Application Settings
-    # ============================================
-    environment: str = Field(default="development", validation_alias="ENVIRONMENT")
-    debug: bool = Field(default=True, validation_alias="DEBUG")
-    log_level: str = Field(default="INFO", validation_alias="LOG_LEVEL")
+    @property
+    def cors_origins_list(self) -> List[str]:
+        """Parse CORS_ORIGINS string into a list"""
+        return [origin.strip() for origin in self.cors_origins.split(",")]
 
     # ============================================
     # Pydantic Settings Configuration
@@ -112,7 +118,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
-        case_sensitive=False,
+        case_sensitive=False,  # Changed to False to be more flexible
         extra="ignore",
     )
 
