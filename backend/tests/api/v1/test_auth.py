@@ -79,7 +79,7 @@ class TestAuthVerifyEndpoint:
         assert "updated_at" in data, "Response missing 'updated_at' field"
 
         # Assert user data matches
-        assert data["id"] == test_user.id, "User ID mismatch"
+        assert data["id"] == str(test_user.id), "User ID mismatch"
         assert data["email"] == test_user.email, "User email mismatch"
         assert data["name"] == test_user.name, "User name mismatch"
         assert data["oauth_provider"] == test_user.oauth_provider, "OAuth provider mismatch"
@@ -296,7 +296,7 @@ class TestAuthenticationEndToEnd:
         """
         # Step 1: Generate JWT token (simulating NextAuth.js)
         payload = {
-            "sub": test_user.id,
+            "sub": str(test_user.id),
             "exp": datetime.utcnow() + timedelta(hours=1),
             "iat": datetime.utcnow(),
         }
@@ -312,7 +312,7 @@ class TestAuthenticationEndToEnd:
         # Step 3: Verify response
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
-        assert data["id"] == test_user.id
+        assert data["id"] == str(test_user.id)
         assert data["email"] == test_user.email
 
         # Step 4: Verify we can make multiple requests with same token
@@ -324,7 +324,7 @@ class TestAuthenticationEndToEnd:
 
         assert response2.status_code == status.HTTP_200_OK
         data2 = response2.json()
-        assert data2["id"] == test_user.id
+        assert data2["id"] == str(test_user.id)
 
     @pytest.mark.asyncio
     async def test_multiple_users_can_authenticate_independently(
@@ -338,7 +338,7 @@ class TestAuthenticationEndToEnd:
         """
         from sqlalchemy import text
 
-        # Create two test users
+        # Create two test users with unique IDs and emails
         user1_id = str(uuid.uuid4())
         user2_id = str(uuid.uuid4())
 
@@ -346,26 +346,28 @@ class TestAuthenticationEndToEnd:
             text("""
                 INSERT INTO users (id, email, name, oauth_provider, oauth_id, created_at, updated_at)
                 VALUES (:id, :email, :name, :provider, :oauth_id, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+                ON CONFLICT (id) DO NOTHING
             """),
             {
                 "id": user1_id,
-                "email": "user1@example.com",
+                "email": f"user1-{user1_id}@example.com",
                 "name": "User One",
                 "provider": "google",
-                "oauth_id": "oauth1",
+                "oauth_id": f"oauth1-{user1_id}",
             },
         )
         await async_db_session.execute(
             text("""
                 INSERT INTO users (id, email, name, oauth_provider, oauth_id, created_at, updated_at)
                 VALUES (:id, :email, :name, :provider, :oauth_id, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+                ON CONFLICT (id) DO NOTHING
             """),
             {
                 "id": user2_id,
-                "email": "user2@example.com",
+                "email": f"user2-{user2_id}@example.com",
                 "name": "User Two",
                 "provider": "github",
-                "oauth_id": "oauth2",
+                "oauth_id": f"oauth2-{user2_id}",
             },
         )
         await async_db_session.commit()
@@ -409,9 +411,9 @@ class TestAuthenticationEndToEnd:
         data1 = response1.json()
         data2 = response2.json()
         assert data1["id"] == user1_id
-        assert data1["email"] == "user1@example.com"
+        assert data1["email"] == f"user1-{user1_id}@example.com"
         assert data2["id"] == user2_id
-        assert data2["email"] == "user2@example.com"
+        assert data2["email"] == f"user2-{user2_id}@example.com"
 
         # Assert users are properly isolated
         assert data1["id"] != data2["id"]
@@ -440,7 +442,7 @@ class TestAuthenticationSecurity:
         """
         # Create forged token with wrong secret
         payload = {
-            "sub": test_user.id,
+            "sub": str(test_user.id),
             "exp": datetime.utcnow() + timedelta(hours=1),
             "iat": datetime.utcnow(),
         }
