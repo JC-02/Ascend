@@ -6,7 +6,7 @@
 # ============================================
 
 import uuid
-from sqlalchemy import CheckConstraint, ForeignKey, Integer, String, Text
+from sqlalchemy import CheckConstraint, ForeignKey, Integer, String, Text, text
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -48,8 +48,8 @@ class InterviewSession(Base, UUIDMixin, TimestampMixin):
     job_description: Mapped[str] = mapped_column(Text, nullable=False)
     generated_questions: Mapped[dict] = mapped_column(
         JSONB,
-        nullable=False,
-        server_default='[]'
+        nullable=True,
+        default=[]
     )
     question_count: Mapped[int] = mapped_column(Integer, nullable=False, default=5)
     status: Mapped[str] = mapped_column(

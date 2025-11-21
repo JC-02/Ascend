@@ -48,9 +48,10 @@ class InterviewSession(Base, UUIDMixin, TimestampMixin):
     # Relationships
     user: Mapped["User"] = relationship("User", back_populates="interview_sessions")
     resume: Mapped["Resume | None"] = relationship("Resume", back_populates="interview_sessions")
-    recordings: Mapped[list["Recording"]] = relationship(
-        "Recording", back_populates="session", cascade="all, delete-orphan"
-    )
+    # NOTE: Recording model not implemented yet (Story 4)
+    # recordings: Mapped[list["Recording"]] = relationship(
+    #     "Recording", back_populates="session", cascade="all, delete-orphan"
+    # )
 
     # Constraints
     __table_args__ = (

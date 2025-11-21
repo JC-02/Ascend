@@ -6,16 +6,15 @@
 # ============================================
 
 import uuid
-from datetime import datetime
 
 from sqlalchemy import CheckConstraint, ForeignKey, Integer, String, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.db.base import Base, UUIDMixin
+from app.db.base import Base, UUIDMixin, TimestampMixin
 
 
-class Resume(Base, UUIDMixin):
+class Resume(Base, UUIDMixin, TimestampMixin):
     """
     Resume model for uploaded resume files.
     
@@ -43,9 +42,6 @@ class Resume(Base, UUIDMixin):
     parsed_text: Mapped[str | None] = mapped_column(Text, nullable=True)
     parsing_status: Mapped[str] = mapped_column(
         String(50), nullable=False, default="pending"
-    )
-    created_at: Mapped[datetime] = mapped_column(
-        String, nullable=False, server_default="NOW()"
     )
 
     # Relationships

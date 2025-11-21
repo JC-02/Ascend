@@ -42,6 +42,28 @@ def event_loop() -> Generator:
 # For Task 1.4.2, we're testing authentication logic which needs User model
 # but doesn't require relationships to work (Recording, Resume, etc.)
 
+@pytest.fixture(scope="session", autouse=True)
+async def setup_test_database():
+    """
+    Setup test database.
+
+    NOTE: For the MVP, we're using the main database which already has
+    tables created via Alembic migrations. This fixture is just a placeholder
+    for future test database setup if needed.
+
+    In production, you would:
+    1. Create a separate test database
+    2. Run migrations on it
+    3. Clean up after tests
+    """
+    # Database schema is already created via Alembic migrations
+    # No additional setup needed for MVP
+    yield
+
+    # Optionally, clean up test data after all tests complete
+    # For now, we'll keep test data for debugging
+
+
 @pytest.fixture(scope="function")
 async def async_db_session() -> AsyncGenerator[AsyncSession, None]:
     """
@@ -95,9 +117,12 @@ async def test_user(async_db_session: AsyncSession, test_user_id: str) -> User:
 
     Usage:
         async def test_user_endpoint(test_user: User):
-            assert test_user.email == "test@example.com"
+            assert test_user.email.startswith("test-")
     """
     from sqlalchemy import text
+
+    # Use unique email per test to avoid conflicts
+    test_email = f"test-{test_user_id}@example.com"
 
     # Insert user directly with SQL to avoid relationship resolution
     await async_db_session.execute(
@@ -108,17 +133,27 @@ async def test_user(async_db_session: AsyncSession, test_user_id: str) -> User:
         """),
         {
             "id": test_user_id,
-            "email": "test@example.com",
+            "email": test_email,
             "name": "Test User",
             "avatar_url": "https://example.com/avatar.jpg",
             "provider": "google",
-            "oauth_id": "test_oauth_123",
+            "oauth_id": f"oauth_{test_user_id}",
         }
     )
     await async_db_session.commit()
 
-    # Fetch the user using SQLAlchemy ORM
-    user = await async_db_session.get(User, test_user_id)
+    # Fetch the user using SQLAlchemy ORM without loading relationships
+    # This avoids relationship resolution errors for models that don't exist yet
+    from sqlalchemy import select
+    from sqlalchemy.orm import selectinload
+
+    # Query without loading any relationships to avoid "Recording" not found error
+    result = await async_db_session.execute(
+        select(User).where(User.id == test_user_id)
+    )
+    user = result.scalar_one_or_none()
+
+    assert user is not None, f"Failed to create or retrieve test user with ID {test_user_id}"
     return user
 
 
