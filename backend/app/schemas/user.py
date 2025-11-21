@@ -7,7 +7,8 @@
 
 from datetime import datetime
 from typing import Literal, Optional
-from pydantic import BaseModel, EmailStr, Field, ConfigDict, HttpUrl
+from uuid import UUID
+from pydantic import BaseModel, EmailStr, Field, ConfigDict, HttpUrl, field_serializer
 
 
 class UserBase(BaseModel):
@@ -46,10 +47,15 @@ class UserResponse(UserBase):
     Schema for returning user data to the client.
     Includes the UUID and timestamps.
     """
-    id: str = Field(..., description="User's unique UUID")
+    id: UUID | str = Field(..., description="User's unique UUID")
     oauth_provider: Literal["google", "github"] = Field(..., description="OAuth provider (google or github)")
     created_at: datetime = Field(..., description="Timestamp when user was created")
     updated_at: datetime = Field(..., description="Timestamp when user was last updated")
+
+    @field_serializer('id')
+    def serialize_id(self, value: UUID | str) -> str:
+        """Convert UUID to string for JSON serialization."""
+        return str(value)
 
     model_config = ConfigDict(
         from_attributes=True,

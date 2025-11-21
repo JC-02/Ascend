@@ -11,6 +11,7 @@ from datetime import datetime, timedelta
 from typing import AsyncGenerator, Generator
 
 import pytest
+import redis.asyncio as aioredis
 from jose import jwt
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
@@ -65,7 +66,41 @@ async def setup_test_database():
 
 
 @pytest.fixture(scope="function")
-async def async_db_session() -> AsyncGenerator[AsyncSession, None]:
+async def clear_rate_limits():
+    """
+    Clear rate limiting keys from Redis before each test.
+
+    This prevents rate limiting from blocking test execution.
+    Tests run in quick succession and would otherwise hit rate limits.
+
+    Usage:
+        async def test_auth(clear_rate_limits):
+            # Rate limits are cleared before this test runs
+            ...
+    """
+    redis_client = None
+    try:
+        redis_client = await aioredis.from_url(
+            settings.redis_url,
+            encoding="utf-8",
+            decode_responses=True,
+        )
+        # Clear all rate limit keys
+        keys = await redis_client.keys("rate_limit:*")
+        if keys:
+            await redis_client.delete(*keys)
+        yield
+    except Exception as e:
+        # If Redis is unavailable, just skip clearing
+        # Tests will still run, just with rate limiting applied
+        yield
+    finally:
+        if redis_client:
+            await redis_client.aclose()
+
+
+@pytest.fixture(scope="function")
+async def async_db_session(clear_rate_limits) -> AsyncGenerator[AsyncSession, None]:
     """
     Create an async database session for testing.
 
