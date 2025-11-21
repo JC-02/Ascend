@@ -3,7 +3,9 @@ import { Inter, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import { QueryProvider } from '@/providers/query-provider';
 import { ThemeProvider } from '@/providers/theme-provider';
+import { SessionProvider } from '@/providers/session-provider';
 import { Toaster } from '@/components/ui/toaster';
+import { auth } from '@/lib/auth';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -22,16 +24,20 @@ export const metadata: Metadata = {
   description: 'AI-powered interview preparation and coaching platform',
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const session = await auth();
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} ${jetbrainsMono.variable} font-sans antialiased`}>
-        <ThemeProvider defaultTheme="dark" storageKey="ascend-ui-theme">
-          <QueryProvider>
-            {children}
-            <Toaster />
-          </QueryProvider>
-        </ThemeProvider>
+        <SessionProvider session={session}>
+          <ThemeProvider defaultTheme="dark" storageKey="ascend-ui-theme">
+            <QueryProvider>
+              {children}
+              <Toaster />
+            </QueryProvider>
+          </ThemeProvider>
+        </SessionProvider>
       </body>
     </html>
   );
