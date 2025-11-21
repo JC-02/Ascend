@@ -9,13 +9,13 @@ import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request, status
-from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
+from app.api.v1 import auth, users
 from app.core.config import settings
 from app.middleware.logging import RequestLoggingMiddleware
 from app.middleware.rate_limit import RateLimitMiddleware
-from app.api.v1 import auth
 
 # Configure logging
 logging.basicConfig(
@@ -146,6 +146,7 @@ async def health_check():
 # ============================================
 # Register all API v1 routers
 app.include_router(auth.router, prefix="/api/v1")
+app.include_router(users.router, prefix="/api/v1")
 
 
 # ============================================
