@@ -6,6 +6,8 @@ import { ThemeProvider } from '@/providers/theme-provider';
 import { SessionProvider } from '@/providers/session-provider';
 import { Toaster } from '@/components/ui/toaster';
 import { auth } from '@/lib/auth';
+import { Header } from '@/components/layout/header';
+import { Footer } from '@/components/layout/footer';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -33,7 +35,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <SessionProvider session={session}>
           <ThemeProvider defaultTheme="dark" storageKey="ascend-ui-theme">
             <QueryProvider>
-              {children}
+              <div className="flex min-h-screen flex-col">
+                <Header />
+                <main className="flex-1">{children}</main>
+                <Footer />
+              </div>
               <Toaster />
             </QueryProvider>
           </ThemeProvider>

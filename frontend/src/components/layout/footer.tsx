@@ -1,6 +1,6 @@
 import * as React from 'react';
 import Link from 'next/link';
-import { Github, Twitter, Linkedin } from 'lucide-react';
+import { Github, Linkedin, Instagram } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface FooterProps {
@@ -11,10 +11,12 @@ interface FooterProps {
  * Footer Component - Site Footer
  * 
  * Features:
- * - Product, Company, Legal links
+ * - Platform, Company, Legal links
  * - Social media icons
+ * - Contact information
  * - Copyright notice
  * - Responsive grid layout
+ * - Persists across all pages
  */
 export function Footer({ className }: FooterProps) {
   const currentYear = new Date().getFullYear();
@@ -29,14 +31,24 @@ export function Footer({ className }: FooterProps) {
               <span className="text-xl font-semibold">Ascend</span>
             </Link>
             <p className="text-sm text-muted-foreground">
-              AI-powered interview preparation platform
+              AI-powered interview preparation platform. Master your interview skills with real-time feedback.
             </p>
+            <div className="pt-2">
+              <a href="mailto:contact@ascend.ai" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                contact@ascend.ai
+              </a>
+            </div>
           </div>
 
-          {/* Product */}
+          {/* Platform */}
           <div className="space-y-3">
-            <h3 className="text-sm font-semibold">Product</h3>
+            <h3 className="text-sm font-semibold">Platform</h3>
             <ul className="space-y-2 text-sm">
+              <li>
+                <Link href="/dashboard" className="text-muted-foreground hover:text-foreground transition-colors">
+                  Dashboard
+                </Link>
+              </li>
               <li>
                 <Link href="/features" className="text-muted-foreground hover:text-foreground transition-colors">
                   Features
@@ -48,8 +60,8 @@ export function Footer({ className }: FooterProps) {
                 </Link>
               </li>
               <li>
-                <Link href="/roadmap" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Roadmap
+                <Link href="/dashboard/support" className="text-muted-foreground hover:text-foreground transition-colors">
+                  Support
                 </Link>
               </li>
             </ul>
@@ -61,7 +73,12 @@ export function Footer({ className }: FooterProps) {
             <ul className="space-y-2 text-sm">
               <li>
                 <Link href="/about" className="text-muted-foreground hover:text-foreground transition-colors">
-                  About
+                  About Us
+                </Link>
+              </li>
+              <li>
+                <Link href="/careers" className="text-muted-foreground hover:text-foreground transition-colors">
+                  Careers
                 </Link>
               </li>
               <li>
@@ -70,8 +87,8 @@ export function Footer({ className }: FooterProps) {
                 </Link>
               </li>
               <li>
-                <Link href="/careers" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Careers
+                <Link href="/contact" className="text-muted-foreground hover:text-foreground transition-colors">
+                  Contact
                 </Link>
               </li>
             </ul>
@@ -92,8 +109,8 @@ export function Footer({ className }: FooterProps) {
                 </Link>
               </li>
               <li>
-                <Link href="/cookies" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Cookie Policy
+                <Link href="/licenses" className="text-muted-foreground hover:text-foreground transition-colors">
+                  MIT License
                 </Link>
               </li>
             </ul>
@@ -118,15 +135,6 @@ export function Footer({ className }: FooterProps) {
               <Github className="h-5 w-5" />
             </a>
             <a
-              href="https://twitter.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-muted-foreground hover:text-foreground transition-colors"
-              aria-label="Twitter"
-            >
-              <Twitter className="h-5 w-5" />
-            </a>
-            <a
               href="https://linkedin.com"
               target="_blank"
               rel="noopener noreferrer"
@@ -134,6 +142,15 @@ export function Footer({ className }: FooterProps) {
               aria-label="LinkedIn"
             >
               <Linkedin className="h-5 w-5" />
+            </a>
+            <a
+              href="https://instagram.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-muted-foreground hover:text-foreground transition-colors"
+              aria-label="Instagram"
+            >
+              <Instagram className="h-5 w-5" />
             </a>
           </div>
         </div>
