@@ -115,23 +115,56 @@ export default function LoginPage() {
               Continue with GitHub
             </Button>
 
-            {/* Terms and Privacy */}
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-slate-700" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-slate-900 px-2 text-slate-500">Development</span>
+              </div>
+            </div>
+
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full text-slate-400 hover:text-slate-200"
+              onClick={() => {
+                document.cookie = "ascend_dev_token=true; path=/";
+                window.location.href = "/dashboard";
+              }}
+            >
+              Developer Login (Bypass)
+            </Button>
+
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"
+              onClick={() => {
+                // TODO: Implement account creation
+                window.location.href = "/register";
+              }}
+            >
+              Create Account
+            </Button>
+
+            {/* New User Info */}
             <p className="px-4 text-center text-xs text-slate-500">
-              By continuing, you agree to our{' '}
-              <a href="/terms" className="underline hover:text-slate-400">
-                Terms of Service
-              </a>{' '}
-              and{' '}
-              <a href="/privacy" className="underline hover:text-slate-400">
-                Privacy Policy
-              </a>
+              New to Ascend AI? Creating an account is quick and easy.
             </p>
           </CardContent>
         </Card>
 
-        {/* Additional Info */}
+        {/* Terms and Privacy */}
         <p className="mt-6 text-center text-sm text-slate-500">
-          New to Ascend AI? Creating an account is quick and easy.
+          By continuing, you agree to our{' '}
+          <a href="/terms" className="underline hover:text-slate-400">
+            Terms of Service
+          </a>{' '}
+          and{' '}
+          <a href="/privacy" className="underline hover:text-slate-400">
+            Privacy Policy
+          </a>
         </p>
       </div>
     </div>
