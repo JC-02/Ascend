@@ -13,6 +13,8 @@ from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
+from app.middleware.logging import RequestLoggingMiddleware
+from app.middleware.rate_limit import RateLimitMiddleware
 
 # Configure logging
 logging.basicConfig(
@@ -64,8 +66,12 @@ app = FastAPI(
 )
 
 # ============================================
-# CORS Configuration
+# Middleware Configuration
 # ============================================
+# Order matters! Middleware is executed in reverse order of addition.
+# Last added = First executed
+
+# 1. CORS (first to execute, allows cross-origin requests)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins,
@@ -73,6 +79,12 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# 2. Request Logging (logs all requests/responses)
+app.add_middleware(RequestLoggingMiddleware)
+
+# 3. Rate Limiting (protects against abuse)
+app.add_middleware(RateLimitMiddleware)
 
 
 # ============================================
