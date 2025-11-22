@@ -27,7 +27,7 @@ export default function ProfilePage() {
     return (
         <div className="space-y-6">
             <PageHeader
-                heading="Profile Settings"
+                title="Profile Settings"
                 description="Manage your personal information and account preferences."
             />
 

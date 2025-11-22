@@ -15,16 +15,16 @@ help:
 	@echo "  make migrate-down  - Rollback last migration"
 
 up:
-	docker-compose up -d
+	docker compose up -d
 
 down:
-	docker-compose down
+	docker compose down
 
 build:
-	docker-compose up --build -d
+	docker compose up --build -d
 
 logs:
-	docker-compose logs -f
+	docker compose logs -f
 
 init-minio:
 	@echo "Initializing MinIO bucket..."
@@ -39,10 +39,10 @@ init-minio:
 
 test-services:
 	@echo "Testing PostgreSQL..."
-	@docker-compose exec postgres pg_isready -U postgres || echo "PostgreSQL not ready"
+	@docker compose exec postgres pg_isready -U postgres || echo "PostgreSQL not ready"
 	@echo ""
 	@echo "Testing Redis..."
-	@docker-compose exec redis redis-cli ping || echo "Redis not ready"
+	@docker compose exec redis redis-cli ping || echo "Redis not ready"
 	@echo ""
 	@echo "Testing MinIO..."
 	@curl -s http://localhost:9000/minio/health/live || echo "MinIO not ready"
@@ -50,12 +50,12 @@ test-services:
 
 migrate:
 	@echo "Running database migrations..."
-	docker-compose exec backend alembic upgrade head
+	docker compose exec backend alembic upgrade head
 
 migrate-create:
 	@echo "Creating new migration: $(MSG)"
-	docker-compose exec backend alembic revision --autogenerate -m "$(MSG)"
+	docker compose exec backend alembic revision --autogenerate -m "$(MSG)"
 
 migrate-down:
 	@echo "Rolling back last migration..."
-	docker-compose exec backend alembic downgrade -1
+	docker compose exec backend alembic downgrade -1
