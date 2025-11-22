@@ -2,6 +2,7 @@
 
 import { PageHeader } from '@/components/layout/page-header';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { MagicCard } from '@/components/ui/magic-card';
 import { Button } from '@/components/ui/button';
 import { Plus, Video, FileText, TrendingUp, Clock, Target, Sparkles, Zap, Brain } from 'lucide-react';
 import Link from 'next/link';
@@ -38,7 +39,7 @@ export default function DashboardPage() {
 
       {/* Stats Grid */}
       <div className="grid gap-6 md:grid-cols-3 mb-8">
-        <Card className="border-border/50 bg-gradient-to-br from-card to-card/50 backdrop-blur hover:border-primary/50 transition-all duration-300 group">
+        <MagicCard className="group">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Sessions</CardTitle>
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-purple-500 to-blue-500 shimmer glow-blue">
@@ -51,9 +52,9 @@ export default function DashboardPage() {
               Start your first session
             </p>
           </CardContent>
-        </Card>
+        </MagicCard>
 
-        <Card className="border-border/50 bg-gradient-to-br from-card to-card/50 backdrop-blur hover:border-primary/50 transition-all duration-300 group">
+        <MagicCard className="group">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Interview Readiness</CardTitle>
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 shimmer glow">
@@ -66,9 +67,9 @@ export default function DashboardPage() {
               Complete sessions to see score
             </p>
           </CardContent>
-        </Card>
+        </MagicCard>
 
-        <Card className="border-border/50 bg-gradient-to-br from-card to-card/50 backdrop-blur hover:border-primary/50 transition-all duration-300 group">
+        <MagicCard className="group">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Practice Time</CardTitle>
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-cyan-500 to-purple-500 shimmer glow">
@@ -79,7 +80,7 @@ export default function DashboardPage() {
             <div className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">0h</div>
             <p className="text-xs text-muted-foreground mt-1">This week</p>
           </CardContent>
-        </Card>
+        </MagicCard>
       </div>
 
       {/* Main Content Grid */}

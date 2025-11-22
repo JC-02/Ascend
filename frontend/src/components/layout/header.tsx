@@ -46,11 +46,11 @@ export function Header({ className }: HeaderProps) {
   return (
     <header
       className={cn(
-        'sticky top-0 z-50 w-full transition-all duration-200',
-        'border-b border-border/40',
+        'sticky top-4 z-50 w-[95%] max-w-7xl mx-auto rounded-full transition-all duration-300',
+        'border border-white/10 shadow-lg',
         isScrolled
-          ? 'bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80'
-          : 'bg-background/80 backdrop-blur',
+          ? 'bg-background/80 backdrop-blur-xl shadow-primary/5 supports-[backdrop-filter]:bg-background/60 top-4'
+          : 'bg-transparent backdrop-blur-sm border-transparent shadow-none top-0 w-full rounded-none max-w-full',
         className
       )}
     >
