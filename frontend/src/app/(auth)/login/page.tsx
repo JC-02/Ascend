@@ -11,30 +11,44 @@
 import { signIn } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Github } from 'lucide-react';
+import { Github, AlertCircle } from 'lucide-react';
 import { useState } from 'react';
 import Image from 'next/image';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 export default function LoginPage() {
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [isGithubLoading, setIsGithubLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleGoogleSignIn = async () => {
     setIsGoogleLoading(true);
+    setError(null);
     try {
-      await signIn('google', { callbackUrl: '/dashboard' });
+      const result = await signIn('google', { callbackUrl: '/dashboard', redirect: false });
+      if (result?.error) {
+        setError('Google sign-in failed. Please check your OAuth configuration.');
+        setIsGoogleLoading(false);
+      }
     } catch (error) {
       console.error('Google sign-in error:', error);
+      setError('An unexpected error occurred. Please try again.');
       setIsGoogleLoading(false);
     }
   };
 
   const handleGithubSignIn = async () => {
     setIsGithubLoading(true);
+    setError(null);
     try {
-      await signIn('github', { callbackUrl: '/dashboard' });
+      const result = await signIn('github', { callbackUrl: '/dashboard', redirect: false });
+      if (result?.error) {
+        setError('GitHub sign-in failed. Please check your OAuth configuration.');
+        setIsGithubLoading(false);
+      }
     } catch (error) {
       console.error('GitHub sign-in error:', error);
+      setError('An unexpected error occurred. Please try again.');
       setIsGithubLoading(false);
     }
   };
@@ -66,6 +80,14 @@ export default function LoginPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            {/* Error Alert */}
+            {error && (
+              <Alert variant="destructive" className="bg-red-950/50 border-red-900">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+
             {/* Google Sign-In Button */}
             <Button
               variant="outline"

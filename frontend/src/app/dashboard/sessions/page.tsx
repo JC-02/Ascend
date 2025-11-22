@@ -24,7 +24,7 @@ export default function SessionsPage() {
     return (
         <div className="space-y-6">
             <PageHeader
-                heading="Interview Sessions"
+                title="Interview Sessions"
                 description="Review your past mock interviews and track your progress."
             />
 
@@ -76,7 +76,7 @@ export default function SessionsPage() {
                                 </div>
                                 <CardTitle className="group-hover:text-primary transition-colors">Session History</CardTitle>
                                 <CardDescription>
-                                    Track your practice time and see how much you've improved over time.
+                                    Track your practice time and see how much you&apos;ve improved over time.
                                 </CardDescription>
                             </CardHeader>
                         </Card>
@@ -103,7 +103,7 @@ export default function SessionsPage() {
                                 </div>
                                 <div>
                                     <CardTitle>What to Expect in Your Sessions</CardTitle>
-                                    <CardDescription>Here's what you'll get from each interview practice</CardDescription>
+                                    <CardDescription>Here&apos;s what you&apos;ll get from each interview practice</CardDescription>
                                 </div>
                             </div>
                         </CardHeader>

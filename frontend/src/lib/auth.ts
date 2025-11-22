@@ -76,18 +76,55 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     },
 
     callbacks: {
-        async jwt({ token, user }) {
-            // Add user ID to the token on sign in
-            if (user) {
-                token.id = user.id;
+        async jwt({ token, user, account, profile }) {
+            // On initial sign-in, create or retrieve user from backend database
+            if (user && account && profile) {
+                try {
+                    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
+
+                    // Call backend to create/get user in database
+                    const response = await fetch(`${apiUrl}/users`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            email: user.email,
+                            name: user.name,
+                            avatar_url: user.image,
+                            oauth_provider: account.provider,
+                            oauth_id: account.providerAccountId,
+                        }),
+                    });
+
+                    if (!response.ok) {
+                        console.error('Failed to create/retrieve user from backend:', response.status);
+                        throw new Error('Failed to create user in database');
+                    }
+
+                    const dbUser = await response.json();
+
+                    // Store the database UUID in the token
+                    token.sub = dbUser.id;
+                    token.email = dbUser.email;
+                    token.name = dbUser.name;
+                    token.picture = dbUser.avatar_url;
+                } catch (error) {
+                    console.error('Error in JWT callback:', error);
+                    // Return token anyway to prevent auth failure, but log the error
+                    // In production, you might want to throw here to prevent incomplete auth
+                }
             }
             return token;
         },
 
         async session({ session, token }) {
-            // Add user ID to the session
-            if (session.user) {
-                session.user.id = token.id as string;
+            // Add user ID and other data to the session
+            if (session.user && token.sub) {
+                session.user.id = token.sub as string;
+                session.user.email = token.email as string;
+                session.user.name = token.name as string;
+                session.user.image = token.picture as string;
             }
             return session;
         },

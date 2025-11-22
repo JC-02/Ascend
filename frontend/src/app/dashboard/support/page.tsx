@@ -12,7 +12,7 @@ export default function SupportPage() {
     return (
         <div className="space-y-6">
             <PageHeader
-                heading="Help & Support"
+                title="Help & Support"
                 description="Get assistance and find answers to common questions."
             />
 
@@ -27,7 +27,7 @@ export default function SupportPage() {
                             <div>
                                 <CardTitle className="text-2xl">Contact Support</CardTitle>
                                 <CardDescription className="text-base">
-                                    Send us a message and we'll get back to you within 24 hours
+                                    Send us a message and we&apos;ll get back to you within 24 hours
                                 </CardDescription>
                             </div>
                         </div>
@@ -176,7 +176,7 @@ export default function SupportPage() {
                                         </h4>
                                         <p className="text-sm text-muted-foreground">
                                             Yes, you can upgrade, downgrade, or cancel your subscription at any time. If you cancel,
-                                            you'll retain access to your current plan until the end of your billing period. No hidden
+                                            you&apos;ll retain access to your current plan until the end of your billing period. No hidden
                                             fees or complicated cancellation process.
                                         </p>
                                     </div>

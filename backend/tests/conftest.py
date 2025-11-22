@@ -102,10 +102,10 @@ async def clear_rate_limits():
 @pytest.fixture(scope="function")
 async def async_db_session(clear_rate_limits) -> AsyncGenerator[AsyncSession, None]:
     """
-    Create an async database session for testing.
+    Create an async database session for testing with automatic cleanup.
 
-    SIMPLIFIED VERSION: This fixture creates a minimal session for testing
-    authentication logic without requiring all models to be complete.
+    This fixture creates a session with transaction rollback to ensure
+    test isolation. Each test gets a clean database state.
 
     For Story 1.4 (Authentication), we only need:
     - User model to exist in database
@@ -117,17 +117,30 @@ async def async_db_session(clear_rate_limits) -> AsyncGenerator[AsyncSession, No
             async_db_session.add(user)
             await async_db_session.commit()
     """
-    # Import only the models we need for this test
-    # This avoids relationship resolution errors for models that don't exist yet
     from app.db.session import AsyncSessionLocal
+    from sqlalchemy import text
 
     async with AsyncSessionLocal() as session:
-        try:
-            yield session
-            # Note: Not rolling back so we can verify data persistence
-            # Each test should clean up its own data or use unique IDs
-        finally:
-            await session.close()
+        # Start a transaction
+        async with session.begin():
+            try:
+                yield session
+                # Rollback the transaction after the test
+                await session.rollback()
+            except Exception:
+                # Ensure rollback on error
+                await session.rollback()
+                raise
+            finally:
+                # Clean up any test users that might have been created
+                try:
+                    await session.execute(
+                        text("DELETE FROM users WHERE email LIKE 'test-%@example.com'")
+                    )
+                    await session.commit()
+                except Exception:
+                    pass
+                await session.close()
 
 
 # ============================================
