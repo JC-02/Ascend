@@ -405,7 +405,7 @@ This is a personal portfolio project. Contributions are not currently accepted.
 
 ## License
 
-**Copyright © 2025 Jordan. All Rights Reserved.**
+**Copyright © 2025 Jordan Cowan. All Rights Reserved.**
 
 This project is proprietary software created for portfolio and demonstration purposes.
 
