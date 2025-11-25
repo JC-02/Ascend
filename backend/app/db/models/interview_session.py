@@ -8,7 +8,7 @@
 import uuid
 from typing import TYPE_CHECKING
 
-from sqlalchemy import CheckConstraint, ForeignKey, Integer, String, Text
+from sqlalchemy import CheckConstraint, ForeignKey, Integer, String, Text, text
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -47,7 +47,7 @@ class InterviewSession(Base, UUIDMixin, TimestampMixin):
 
     # Session Data
     job_description: Mapped[str] = mapped_column(Text, nullable=False)
-    generated_questions: Mapped[dict] = mapped_column(JSONB, nullable=True, default=[])
+    generated_questions: Mapped[dict] = mapped_column(JSONB, nullable=True, server_default=text("'[]'::jsonb"))
     question_count: Mapped[int] = mapped_column(Integer, nullable=False, default=5)
     status: Mapped[str] = mapped_column(String(50), nullable=False, default="pending", index=True)
 
