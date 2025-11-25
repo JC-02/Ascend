@@ -156,7 +156,7 @@ def test_user_id() -> str:
 @pytest.fixture
 async def test_user(async_db_session: AsyncSession, test_user_id: str) -> User:
     """Create a test user for authentication tests."""
-    from sqlalchemy import text
+    from sqlalchemy import select, text
     from app.db.models.user import User
     
     # Insert user using raw SQL
@@ -177,7 +177,7 @@ async def test_user(async_db_session: AsyncSession, test_user_id: str) -> User:
             "oauth_id": f"oauth_{test_user_id}",
         },
     )
-    await async_db_session.flush()  # Change from commit() to flush()
+    await async_db_session.flush()
     
     # Fetch the user
     result = await async_db_session.execute(select(User).where(User.id == test_user_id))
