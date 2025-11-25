@@ -29,15 +29,15 @@ router = APIRouter(
     summary="Create Interview Session (Not Implemented)",
     description="""
     **This endpoint is not yet implemented.**
-    
+
     This endpoint will be implemented in Epic 2, Story 2.2.
-    
+
     **Planned Functionality:**
     - Accept job description and resume ID
     - Create interview session record
     - Trigger AI question generation workflow
     - Return session ID for polling
-    
+
     **Returns:** 501 Not Implemented (for now)
     """,
 )
@@ -46,7 +46,7 @@ async def create_session(
 ):
     """
     Create interview session endpoint placeholder.
-    
+
     This endpoint is reserved for Epic 2 implementation.
     Returns 501 Not Implemented status.
     """
@@ -56,8 +56,8 @@ async def create_session(
             "detail": "Session creation functionality will be implemented in Epic 2",
             "epic": "EPIC-2: Core Data Ingestion & Session Creation",
             "story": "STORY-2.2: Interview Session Creation",
-            "status": "not_implemented"
-        }
+            "status": "not_implemented",
+        },
     )
 
 
@@ -70,15 +70,15 @@ async def create_session(
     summary="Get Session Details (Not Implemented)",
     description="""
     **This endpoint is not yet implemented.**
-    
+
     This endpoint will be implemented in Epic 2, Story 2.2.
-    
+
     **Planned Functionality:**
     - Retrieve session details by ID
     - Include generated questions
     - Show session status (processing/complete)
     - Authorization check (user owns session)
-    
+
     **Returns:** 501 Not Implemented (for now)
     """,
 )
@@ -88,7 +88,7 @@ async def get_session(
 ):
     """
     Get session endpoint placeholder.
-    
+
     Returns 501 Not Implemented status.
     """
     return JSONResponse(
@@ -97,8 +97,8 @@ async def get_session(
             "detail": "Session retrieval functionality will be implemented in Epic 2",
             "epic": "EPIC-2: Core Data Ingestion & Session Creation",
             "story": "STORY-2.2: Interview Session Creation",
-            "status": "not_implemented"
-        }
+            "status": "not_implemented",
+        },
     )
 
 
@@ -111,14 +111,14 @@ async def get_session(
     summary="List User Sessions (Not Implemented)",
     description="""
     **This endpoint is not yet implemented.**
-    
+
     This endpoint will be implemented in Epic 2.
-    
+
     **Planned Functionality:**
     - List all sessions for authenticated user
     - Include session status and metadata
     - Support pagination and filtering
-    
+
     **Returns:** 501 Not Implemented (for now)
     """,
 )
@@ -127,7 +127,7 @@ async def list_sessions(
 ):
     """
     List sessions endpoint placeholder.
-    
+
     Returns 501 Not Implemented status.
     """
     return JSONResponse(
@@ -135,6 +135,6 @@ async def list_sessions(
         content={
             "detail": "Session listing functionality will be implemented in Epic 2",
             "epic": "EPIC-2: Core Data Ingestion & Session Creation",
-            "status": "not_implemented"
-        }
+            "status": "not_implemented",
+        },
     )

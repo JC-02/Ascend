@@ -5,16 +5,22 @@
 # Follows CCS database schema specification
 # ============================================
 
+from typing import TYPE_CHECKING
+
 from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base, TimestampMixin, UUIDMixin
 
+if TYPE_CHECKING:
+    from app.db.models.interview_session import InterviewSession
+    from app.db.models.resume import Resume
+
 
 class User(Base, UUIDMixin, TimestampMixin):
     """
     User model for OAuth-authenticated users.
-    
+
     Follows CCS database schema:
     - id: UUID primary key
     - email: Unique email address

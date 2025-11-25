@@ -6,20 +6,21 @@
 # ============================================
 
 import uuid
-import pytest
 from datetime import datetime, timedelta
+
+import pytest
 from fastapi import HTTPException
 from fastapi.security import HTTPAuthorizationCredentials
 from jose import jwt
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.auth import get_current_user
+from app.core.config import settings
 from app.core.security import (
     decode_jwt_token,
-    verify_token_signature,
     extract_user_id_from_token,
+    verify_token_signature,
 )
-from app.core.config import settings
 from app.db.models.user import User
 
 
@@ -114,9 +115,7 @@ class TestVerifyTokenSignature:
 class TestExtractUserIdFromToken:
     """Test suite for extract_user_id_from_token utility function."""
 
-    def test_extract_user_id_from_valid_token(
-        self, valid_jwt_token: str, test_user_id: str
-    ):
+    def test_extract_user_id_from_valid_token(self, valid_jwt_token: str, test_user_id: str):
         """Test extracting user ID from a valid token."""
         user_id = extract_user_id_from_token(valid_jwt_token)
         assert user_id == test_user_id
@@ -158,9 +157,7 @@ class TestGetCurrentUser:
     ):
         """Test get_current_user with a valid JWT token."""
         # Create mock credentials
-        credentials = HTTPAuthorizationCredentials(
-            scheme="Bearer", credentials=valid_jwt_token
-        )
+        credentials = HTTPAuthorizationCredentials(scheme="Bearer", credentials=valid_jwt_token)
 
         # Call the dependency
         user = await get_current_user(credentials, async_db_session)
@@ -180,9 +177,7 @@ class TestGetCurrentUser:
         async_db_session: AsyncSession,
     ):
         """Test get_current_user with expired token raises 401."""
-        credentials = HTTPAuthorizationCredentials(
-            scheme="Bearer", credentials=expired_jwt_token
-        )
+        credentials = HTTPAuthorizationCredentials(scheme="Bearer", credentials=expired_jwt_token)
 
         with pytest.raises(HTTPException) as exc_info:
             await get_current_user(credentials, async_db_session)
@@ -197,9 +192,7 @@ class TestGetCurrentUser:
         async_db_session: AsyncSession,
     ):
         """Test get_current_user with invalid signature raises 401."""
-        credentials = HTTPAuthorizationCredentials(
-            scheme="Bearer", credentials=invalid_jwt_token
-        )
+        credentials = HTTPAuthorizationCredentials(scheme="Bearer", credentials=invalid_jwt_token)
 
         with pytest.raises(HTTPException) as exc_info:
             await get_current_user(credentials, async_db_session)
@@ -214,9 +207,7 @@ class TestGetCurrentUser:
         async_db_session: AsyncSession,
     ):
         """Test get_current_user with malformed token raises 401."""
-        credentials = HTTPAuthorizationCredentials(
-            scheme="Bearer", credentials=malformed_jwt_token
-        )
+        credentials = HTTPAuthorizationCredentials(scheme="Bearer", credentials=malformed_jwt_token)
 
         with pytest.raises(HTTPException) as exc_info:
             await get_current_user(credentials, async_db_session)
@@ -276,9 +267,7 @@ class TestGetCurrentUser:
         async_db_session: AsyncSession,
     ):
         """Test that get_current_user returns complete User ORM object with all fields."""
-        credentials = HTTPAuthorizationCredentials(
-            scheme="Bearer", credentials=valid_jwt_token
-        )
+        credentials = HTTPAuthorizationCredentials(scheme="Bearer", credentials=valid_jwt_token)
 
         user = await get_current_user(credentials, async_db_session)
 
@@ -352,30 +341,34 @@ class TestAuthenticationIntegration:
 
         # Create two different users using raw SQL to avoid relationship issues
         await async_db_session.execute(
-            text("""
+            text(
+                """
                 INSERT INTO users (id, email, name, oauth_provider, oauth_id, created_at, updated_at)
                 VALUES (:id, :email, :name, :provider, :oauth_id, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-            """),
+            """
+            ),
             {
                 "id": user1_id,
                 "email": "user1@example.com",
                 "name": "User One",
                 "provider": "google",
                 "oauth_id": "oauth1",
-            }
+            },
         )
         await async_db_session.execute(
-            text("""
+            text(
+                """
                 INSERT INTO users (id, email, name, oauth_provider, oauth_id, created_at, updated_at)
                 VALUES (:id, :email, :name, :provider, :oauth_id, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-            """),
+            """
+            ),
             {
                 "id": user2_id,
                 "email": "user2@example.com",
                 "name": "User Two",
                 "provider": "github",
                 "oauth_id": "oauth2",
-            }
+            },
         )
         await async_db_session.commit()
 
@@ -455,9 +448,7 @@ class TestAuthenticationSecurityEdgeCases:
         }
 
         # Sign with wrong secret
-        forged_token = jwt.encode(
-            payload, "attacker-secret-key-123456789012", algorithm="HS256"
-        )
+        forged_token = jwt.encode(payload, "attacker-secret-key-123456789012", algorithm="HS256")
 
         # Verification should fail
         assert verify_token_signature(forged_token) is False

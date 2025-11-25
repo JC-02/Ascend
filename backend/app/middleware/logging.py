@@ -7,11 +7,10 @@
 
 import logging
 import time
-import json
-from typing import Callable
+from collections.abc import Callable
+
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
-from starlette.types import Message
 
 logger = logging.getLogger(__name__)
 
@@ -51,7 +50,6 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
         request_id = id(request)
         method = request.method
         path = request.url.path
-        query_params = str(request.url.query) if request.url.query else None
         client_host = request.client.host if request.client else "unknown"
         user_agent = request.headers.get("user-agent", "unknown")
 
@@ -88,7 +86,7 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
                 f"[{request_id}] {method} {path} - "
                 f"Status: {status_code} - "
                 f"Duration: {duration:.3f}s - "
-                f"Client: {client_host}"
+                f"Client: {client_host}",
             )
 
             # Log failed authentication attempts for security monitoring
@@ -110,7 +108,7 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
                 f"Exception: {type(e).__name__}: {str(e)} - "
                 f"Duration: {duration:.3f}s - "
                 f"Client: {client_host}",
-                exc_info=True
+                exc_info=True,
             )
             raise
 

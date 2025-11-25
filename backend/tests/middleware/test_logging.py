@@ -4,10 +4,11 @@
 # Tests for request/response logging functionality
 # ============================================
 
+import logging
+
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
-import logging
 
 from app.middleware.logging import RequestLoggingMiddleware, get_client_ip
 
@@ -104,8 +105,9 @@ def test_logging_middleware_errors_on_5xx_errors(client, caplog):
 
 def test_get_client_ip_returns_direct_ip(app_with_logging):
     """Test that get_client_ip returns direct client IP."""
-    from fastapi import Request
     from unittest.mock import Mock
+
+    from fastapi import Request
 
     # Mock request with direct client IP
     request = Mock(spec=Request)
@@ -118,8 +120,9 @@ def test_get_client_ip_returns_direct_ip(app_with_logging):
 
 def test_get_client_ip_returns_forwarded_ip(app_with_logging):
     """Test that get_client_ip returns X-Forwarded-For IP when present."""
-    from fastapi import Request
     from unittest.mock import Mock
+
+    from fastapi import Request
 
     # Mock request with X-Forwarded-For header
     request = Mock(spec=Request)
@@ -133,8 +136,9 @@ def test_get_client_ip_returns_forwarded_ip(app_with_logging):
 
 def test_get_client_ip_handles_no_client(app_with_logging):
     """Test that get_client_ip handles missing client gracefully."""
-    from fastapi import Request
     from unittest.mock import Mock
+
+    from fastapi import Request
 
     # Mock request without client
     request = Mock(spec=Request)

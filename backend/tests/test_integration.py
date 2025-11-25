@@ -4,10 +4,10 @@
 # Tests for complete request flow with all middleware
 # ============================================
 
+import time
+
 import pytest
 from fastapi.testclient import TestClient
-from unittest.mock import patch, AsyncMock
-import time
 
 from app.main import app
 
@@ -35,10 +35,7 @@ def test_health_check_with_logging(client, caplog):
 
 def test_cors_headers_present(client):
     """Test that CORS middleware is working."""
-    response = client.get(
-        "/health",
-        headers={"Origin": "http://localhost:3000"}
-    )
+    response = client.get("/health", headers={"Origin": "http://localhost:3000"})
 
     assert response.status_code == 200
     # CORS headers should be present (if origin is allowed)
@@ -101,11 +98,7 @@ def test_multiple_requests_sequential(client):
 def test_request_with_custom_headers(client):
     """Test that custom headers are handled correctly."""
     response = client.get(
-        "/health",
-        headers={
-            "User-Agent": "TestClient/1.0",
-            "X-Custom-Header": "test-value"
-        }
+        "/health", headers={"User-Agent": "TestClient/1.0", "X-Custom-Header": "test-value"}
     )
 
     assert response.status_code == 200
@@ -114,10 +107,7 @@ def test_request_with_custom_headers(client):
 def test_request_with_bearer_token_format(client):
     """Test that requests with Bearer token format are handled."""
     # Note: This won't authenticate (invalid token) but should be processed
-    response = client.get(
-        "/health",
-        headers={"Authorization": "Bearer fake-token-for-testing"}
-    )
+    response = client.get("/health", headers={"Authorization": "Bearer fake-token-for-testing"})
 
     assert response.status_code == 200
 

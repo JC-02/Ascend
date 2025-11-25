@@ -5,10 +5,9 @@
 # Provides 25x performance improvement with 90% DB load reduction
 # ============================================
 
-import logging
 import json
-from typing import Optional, Any
-from datetime import timedelta
+import logging
+
 import redis.asyncio as aioredis
 
 from app.core.config import settings
@@ -41,7 +40,7 @@ class TokenCache:
 
     def __init__(self):
         """Initialize token cache with Redis connection."""
-        self.redis_client: Optional[aioredis.Redis] = None
+        self.redis_client: aioredis.Redis | None = None
         self._initialized = False
 
     async def _ensure_connection(self):
@@ -67,7 +66,7 @@ class TokenCache:
                 self.redis_client = None
                 self._initialized = True
 
-    async def get_user_from_cache(self, token: str) -> Optional[dict]:
+    async def get_user_from_cache(self, token: str) -> dict | None:
         """
         Retrieve cached user data for a token.
 
@@ -104,7 +103,7 @@ class TokenCache:
         self,
         token: str,
         user_data: dict,
-        ttl_seconds: int = 900  # 15 minutes
+        ttl_seconds: int = 900,  # 15 minutes
     ) -> bool:
         """
         Cache user data for a token.
@@ -130,15 +129,10 @@ class TokenCache:
             cached_value = json.dumps(user_data)
 
             # Store in cache with expiration
-            await self.redis_client.setex(
-                cache_key,
-                ttl_seconds,
-                cached_value
-            )
+            await self.redis_client.setex(cache_key, ttl_seconds, cached_value)
 
             logger.debug(
-                f"Cached user data for token (key: {cache_key[:16]}..., "
-                f"ttl: {ttl_seconds}s)"
+                f"Cached user data for token (key: {cache_key[:16]}..., " f"ttl: {ttl_seconds}s)"
             )
             return True
 
@@ -228,6 +222,7 @@ class TokenCache:
             str: Cache key
         """
         import hashlib
+
         token_hash = hashlib.sha256(token.encode()).hexdigest()
         return f"token_cache:{token_hash}"
 
@@ -250,18 +245,14 @@ class TokenCache:
             keyspace_misses = int(info.get("keyspace_misses", 0))
             total_requests = keyspace_hits + keyspace_misses
 
-            hit_rate = (
-                (keyspace_hits / total_requests * 100)
-                if total_requests > 0
-                else 0
-            )
+            hit_rate = (keyspace_hits / total_requests * 100) if total_requests > 0 else 0
 
             return {
                 "status": "available",
                 "hits": keyspace_hits,
                 "misses": keyspace_misses,
                 "hit_rate_percent": round(hit_rate, 2),
-                "total_requests": total_requests
+                "total_requests": total_requests,
             }
 
         except Exception as e:

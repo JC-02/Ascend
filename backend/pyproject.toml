@@ -46,8 +46,14 @@ exclude = [
 [tool.ruff.per-file-ignores]
 # Allow unused imports in __init__.py files
 "__init__.py" = ["F401"]
-# Allow assert statements in tests
-"tests/**/*.py" = ["S101"]
+# Allow assert statements and unused method arguments in tests (pytest fixtures)
+"tests/**/*.py" = ["S101", "ARG001", "ARG002", "SIM117", "B007"]
+# Allow unused arguments in API endpoints (FastAPI dependency injection often causes this)
+"app/api/**/*.py" = ["ARG001"]
+# Allow unused arguments in DB models (SQLAlchemy relationships often cause this)
+"app/db/**/*.py" = ["ARG001"]
+# Allow loop control variable issues in alembic migrations (auto-generated code)
+"alembic/**/*.py" = ["B007"]
 
 [tool.ruff.isort]
 known-first-party = ["app"]

@@ -5,12 +5,13 @@
 # Story 1.4, Task 1.4.1
 # ============================================
 
-import pytest
-from datetime import datetime
 import uuid
+from datetime import datetime
+
+import pytest
 from pydantic import ValidationError
 
-from app.schemas import UserBase, UserCreate, UserResponse, TokenPayload
+from app.schemas import TokenPayload, UserBase, UserCreate, UserResponse
 
 
 class TestUserBase:
@@ -19,9 +20,7 @@ class TestUserBase:
     def test_user_base_valid(self):
         """Test UserBase with valid data."""
         user = UserBase(
-            email="test@example.com",
-            name="Test User",
-            avatar_url="https://example.com/avatar.jpg"
+            email="test@example.com", name="Test User", avatar_url="https://example.com/avatar.jpg"
         )
         assert user.email == "test@example.com"
         assert user.name == "Test User"
@@ -42,10 +41,7 @@ class TestUserBase:
     def test_user_base_invalid_avatar_url(self):
         """Test UserBase with invalid avatar URL."""
         with pytest.raises(ValidationError):
-            UserBase(
-                email="test@example.com",
-                avatar_url="not-a-valid-url"
-            )
+            UserBase(email="test@example.com", avatar_url="not-a-valid-url")
 
 
 class TestUserCreate:
@@ -58,7 +54,7 @@ class TestUserCreate:
             name="Test User",
             avatar_url="https://example.com/avatar.jpg",
             oauth_provider="google",
-            oauth_id="123456"
+            oauth_id="123456",
         )
         assert user.email == "test@example.com"
         assert user.oauth_provider == "google"
@@ -75,7 +71,7 @@ class TestUserCreate:
             UserCreate(
                 email="test@example.com",
                 oauth_provider="facebook",  # Only 'google' or 'github' allowed
-                oauth_id="123456"
+                oauth_id="123456",
             )
 
     def test_user_create_valid_github_provider(self):
@@ -84,7 +80,7 @@ class TestUserCreate:
             email="test@example.com",
             name="GitHub User",
             oauth_provider="github",
-            oauth_id="gh123456"
+            oauth_id="gh123456",
         )
         assert user.oauth_provider == "github"
 
@@ -104,7 +100,7 @@ class TestUserResponse:
             avatar_url="https://example.com/avatar.jpg",
             oauth_provider="google",
             created_at=now,
-            updated_at=now
+            updated_at=now,
         )
 
         assert user.id == user_id
@@ -122,7 +118,7 @@ class TestUserResponse:
             "avatar_url": "https://example.com/avatar.jpg",
             "oauth_provider": "github",
             "created_at": datetime.now(),
-            "updated_at": datetime.now()
+            "updated_at": datetime.now(),
         }
 
         user = UserResponse(**user_data)
@@ -138,11 +134,7 @@ class TestTokenPayload:
         user_id = str(uuid.uuid4())
         current_time = int(datetime.now().timestamp())
 
-        token = TokenPayload(
-            sub=user_id,
-            exp=current_time + 3600,
-            iat=current_time
-        )
+        token = TokenPayload(sub=user_id, exp=current_time + 3600, iat=current_time)
 
         assert token.sub == user_id
         assert token.exp == current_time + 3600
@@ -159,6 +151,7 @@ class TestSchemaIntegration:
 
     def test_orm_to_response_conversion(self):
         """Test converting ORM-like object to UserResponse."""
+
         # Simulate ORM object with attributes
         class MockUser:
             def __init__(self):

@@ -6,18 +6,23 @@
 # ============================================
 
 import uuid
+from typing import TYPE_CHECKING
 
 from sqlalchemy import CheckConstraint, ForeignKey, Integer, String, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.db.base import Base, UUIDMixin, TimestampMixin
+from app.db.base import Base, TimestampMixin, UUIDMixin
+
+if TYPE_CHECKING:
+    from app.db.models.interview_session import InterviewSession
+    from app.db.models.user import User
 
 
 class Resume(Base, UUIDMixin, TimestampMixin):
     """
     Resume model for uploaded resume files.
-    
+
     Follows CCS database schema:
     - id: UUID primary key
     - user_id: Foreign key to users table
@@ -40,9 +45,7 @@ class Resume(Base, UUIDMixin, TimestampMixin):
     file_size_bytes: Mapped[int] = mapped_column(Integer, nullable=False)
     mime_type: Mapped[str] = mapped_column(String(100), nullable=False)
     parsed_text: Mapped[str | None] = mapped_column(Text, nullable=True)
-    parsing_status: Mapped[str] = mapped_column(
-        String(50), nullable=False, default="pending"
-    )
+    parsing_status: Mapped[str] = mapped_column(String(50), nullable=False, default="pending")
 
     # Relationships
     user: Mapped["User"] = relationship("User", back_populates="resumes")

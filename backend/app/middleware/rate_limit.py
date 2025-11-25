@@ -7,10 +7,11 @@
 
 import logging
 import time
-from typing import Callable, Optional
-from fastapi import Request, Response, HTTPException, status
-from starlette.middleware.base import BaseHTTPMiddleware
+from collections.abc import Callable
+
 import redis.asyncio as aioredis
+from fastapi import HTTPException, Request, Response, status
+from starlette.middleware.base import BaseHTTPMiddleware
 
 from app.core.config import settings
 
@@ -47,7 +48,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
             app: FastAPI application instance
         """
         super().__init__(app)
-        self.redis_client: Optional[aioredis.Redis] = None
+        self.redis_client: aioredis.Redis | None = None
         self._initialized = False
 
     async def _ensure_redis_connection(self):
@@ -110,10 +111,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         # Check rate limit
         try:
             allowed = await self._check_rate_limit(
-                client_ip=client_ip,
-                endpoint=f"{method}:{path}",
-                limit=limit,
-                window=window
+                client_ip=client_ip, endpoint=f"{method}:{path}", limit=limit, window=window
             )
 
             if not allowed:
@@ -131,8 +129,8 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
                     headers={
                         "Retry-After": str(window),
                         "X-RateLimit-Limit": str(limit),
-                        "X-RateLimit-Window": str(window)
-                    }
+                        "X-RateLimit-Window": str(window),
+                    },
                 )
 
             # Process request
@@ -140,10 +138,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
 
             # Add rate limit headers to response
             remaining = await self._get_remaining_requests(
-                client_ip=client_ip,
-                endpoint=f"{method}:{path}",
-                limit=limit,
-                window=window
+                client_ip=client_ip, endpoint=f"{method}:{path}", limit=limit, window=window
             )
             response.headers["X-RateLimit-Limit"] = str(limit)
             response.headers["X-RateLimit-Remaining"] = str(max(0, remaining))
@@ -158,7 +153,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
             # Fail open - allow request if rate limiting fails
             return await call_next(request)
 
-    def _get_rate_limit(self, path: str, method: str) -> tuple[int, int]:
+    def _get_rate_limit(self, path: str, _method: str) -> tuple[int, int]:
         """
         Get rate limit configuration for endpoint.
 
@@ -181,11 +176,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         return (100, 60)  # 100 requests per minute
 
     async def _check_rate_limit(
-        self,
-        client_ip: str,
-        endpoint: str,
-        limit: int,
-        window: int
+        self, client_ip: str, endpoint: str, limit: int, window: int
     ) -> bool:
         """
         Check if request is within rate limit using sliding window.
@@ -228,11 +219,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         return count < limit
 
     async def _get_remaining_requests(
-        self,
-        client_ip: str,
-        endpoint: str,
-        limit: int,
-        window: int
+        self, client_ip: str, endpoint: str, limit: int, window: int
     ) -> int:
         """
         Get remaining requests available in current window.

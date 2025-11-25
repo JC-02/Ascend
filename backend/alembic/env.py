@@ -9,8 +9,9 @@ from alembic import context
 # Import settings and models
 from app.core.config import settings
 from app.db.base import Base
+
 # Import all models for autogenerate to detect them
-from app.db.models import User, Resume, InterviewSession  # noqa: F401
+from app.db.models import InterviewSession, Resume, User  # noqa: F401
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

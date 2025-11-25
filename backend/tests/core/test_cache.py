@@ -4,11 +4,12 @@
 # Tests for Redis-based JWT token caching
 # ============================================
 
-import pytest
-from unittest.mock import AsyncMock, patch
 import json
+from unittest.mock import AsyncMock, patch
 
-from app.core.cache import TokenCache, token_cache
+import pytest
+
+from app.core.cache import TokenCache
 
 
 @pytest.mark.asyncio
@@ -53,11 +54,7 @@ async def test_cache_user_data_and_retrieval():
     mock_redis.ping = AsyncMock(return_value=True)
     mock_redis.setex = AsyncMock(return_value=True)
 
-    user_data = {
-        "id": "123",
-        "email": "test@example.com",
-        "name": "Test User"
-    }
+    user_data = {"id": "123", "email": "test@example.com", "name": "Test User"}
 
     # Mock get to return the cached data
     mock_redis.get = AsyncMock(return_value=json.dumps(user_data))
@@ -122,7 +119,7 @@ async def test_invalidate_user_tokens():
         keys = [
             "token_cache:user:123:token1",
             "token_cache:user:123:token2",
-            "token_cache:user:123:token3"
+            "token_cache:user:123:token3",
         ]
         for key in keys:
             yield key
@@ -201,10 +198,7 @@ async def test_get_cache_stats_when_available():
 
     # Mock Redis info response
     mock_redis = AsyncMock()
-    mock_redis.info = AsyncMock(return_value={
-        "keyspace_hits": 1000,
-        "keyspace_misses": 100
-    })
+    mock_redis.info = AsyncMock(return_value={"keyspace_hits": 1000, "keyspace_misses": 100})
     cache.redis_client = mock_redis
 
     stats = await cache.get_cache_stats()
@@ -225,10 +219,7 @@ async def test_get_cache_stats_handles_zero_requests():
 
     # Mock Redis info with zero hits/misses
     mock_redis = AsyncMock()
-    mock_redis.info = AsyncMock(return_value={
-        "keyspace_hits": 0,
-        "keyspace_misses": 0
-    })
+    mock_redis.info = AsyncMock(return_value={"keyspace_hits": 0, "keyspace_misses": 0})
     cache.redis_client = mock_redis
 
     stats = await cache.get_cache_stats()
@@ -277,7 +268,7 @@ async def test_ensure_connection_only_runs_once():
     """Test that Redis connection is only initialized once."""
     cache = TokenCache()
 
-    with patch('app.core.cache.aioredis.from_url') as mock_from_url:
+    with patch("app.core.cache.aioredis.from_url") as mock_from_url:
         mock_redis = AsyncMock()
         mock_redis.ping = AsyncMock(return_value=True)
         mock_from_url.return_value = mock_redis
