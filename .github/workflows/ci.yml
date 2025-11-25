@@ -10,7 +10,6 @@ jobs:
   backend:
     runs-on: ubuntu-latest
     
-    # Move services HERE (job level)
     services:
       postgres:
         image: postgres:15
@@ -36,7 +35,6 @@ jobs:
         ports:
           - 6379:6379
     
-    # Move env HERE (job level)
     env:
       # Database
       DATABASE_URL: postgresql+asyncpg://test:test@localhost:5432/test_db
@@ -84,6 +82,16 @@ jobs:
         pip install -r requirements.txt
         pip install pytest pytest-asyncio httpx
         pip install asyncpg
+    
+    - name: Setup Database
+      run: |
+        # Install PostgreSQL client tools
+        sudo apt-get update
+        sudo apt-get install -y postgresql-client
+        
+        # Drop and recreate the database to ensure clean state
+        PGPASSWORD=test psql -h localhost -U test -d postgres -c "DROP DATABASE IF EXISTS test_db;"
+        PGPASSWORD=test psql -h localhost -U test -d postgres -c "CREATE DATABASE test_db;"
     
     - name: Run migrations
       run: |
