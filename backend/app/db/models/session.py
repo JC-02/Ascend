@@ -6,6 +6,7 @@
 # ============================================
 
 import uuid
+from typing import TYPE_CHECKING
 
 from sqlalchemy import CheckConstraint, ForeignKey, Integer, String, Text
 from sqlalchemy.dialects.postgresql import JSONB, UUID
@@ -13,11 +14,15 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base, TimestampMixin, UUIDMixin
 
+if TYPE_CHECKING:
+    from app.db.models.resume import Resume
+    from app.db.models.user import User
+
 
 class InterviewSession(Base, UUIDMixin, TimestampMixin):
     """
     Interview Session model for mock interview sessions.
-    
+
     Follows CCS database schema:
     - id: UUID primary key
     - user_id: Foreign key to users table

@@ -12,15 +12,14 @@ from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from app.api.v1 import auth, users, resumes, sessions
+from app.api.v1 import auth, resumes, sessions, users
 from app.core.config import settings
 from app.middleware.logging import RequestLoggingMiddleware
 from app.middleware.rate_limit import RateLimitMiddleware
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -29,7 +28,7 @@ logger = logging.getLogger(__name__)
 # Application Lifespan
 # ============================================
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(_app: FastAPI):
     """
     Application lifespan context manager.
     Handles startup and shutdown events.
@@ -105,8 +104,7 @@ async def global_exception_handler(request: Request, exc: Exception):
         JSONResponse with 500 status and error details
     """
     logger.error(
-        f"Unhandled exception on {request.method} {request.url.path}: {exc}",
-        exc_info=True
+        f"Unhandled exception on {request.method} {request.url.path}: {exc}", exc_info=True
     )
 
     return JSONResponse(
@@ -114,8 +112,8 @@ async def global_exception_handler(request: Request, exc: Exception):
         content={
             "detail": "Internal server error",
             "error_type": "InternalServerError",
-            "path": str(request.url.path)
-        }
+            "path": str(request.url.path),
+        },
     )
 
 
@@ -137,7 +135,7 @@ async def health_check():
         "status": "healthy",
         "service": "ascend-api",
         "environment": settings.environment,
-        "version": "1.0.0"
+        "version": "1.0.0",
     }
 
 
@@ -162,9 +160,4 @@ async def root():
     Returns:
         dict: Basic API information and links
     """
-    return {
-        "message": "Ascend AI API",
-        "version": "1.0.0",
-        "docs": "/docs",
-        "health": "/health"
-    }
+    return {"message": "Ascend AI API", "version": "1.0.0", "docs": "/docs", "health": "/health"}

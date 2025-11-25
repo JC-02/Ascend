@@ -6,8 +6,9 @@
 # ============================================
 
 import uuid
-import pytest
 from datetime import datetime, timedelta
+
+import pytest
 from fastapi import status
 from httpx import AsyncClient
 from jose import jwt
@@ -65,8 +66,7 @@ class TestAuthVerifyEndpoint:
 
         # Assert status code
         assert response.status_code == status.HTTP_200_OK, (
-            f"Expected 200 OK, got {response.status_code}. "
-            f"Response: {response.text}"
+            f"Expected 200 OK, got {response.status_code}. " f"Response: {response.text}"
         )
 
         # Assert response body
@@ -110,16 +110,16 @@ class TestAuthVerifyEndpoint:
             )
 
         # Assert status code
-        assert response.status_code == status.HTTP_401_UNAUTHORIZED, (
-            f"Expected 401 Unauthorized, got {response.status_code}"
-        )
+        assert (
+            response.status_code == status.HTTP_401_UNAUTHORIZED
+        ), f"Expected 401 Unauthorized, got {response.status_code}"
 
         # Assert error response structure
         data = response.json()
         assert "detail" in data, "Response missing 'detail' field"
-        assert "Invalid authentication token" in data["detail"], (
-            "Error detail should mention invalid token"
-        )
+        assert (
+            "Invalid authentication token" in data["detail"]
+        ), "Error detail should mention invalid token"
 
     @pytest.mark.asyncio
     async def test_verify_with_invalid_signature_returns_401(
@@ -343,11 +343,13 @@ class TestAuthenticationEndToEnd:
         user2_id = str(uuid.uuid4())
 
         await async_db_session.execute(
-            text("""
+            text(
+                """
                 INSERT INTO users (id, email, name, oauth_provider, oauth_id, created_at, updated_at)
                 VALUES (:id, :email, :name, :provider, :oauth_id, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
                 ON CONFLICT (id) DO NOTHING
-            """),
+            """
+            ),
             {
                 "id": user1_id,
                 "email": f"user1-{user1_id}@example.com",
@@ -357,11 +359,13 @@ class TestAuthenticationEndToEnd:
             },
         )
         await async_db_session.execute(
-            text("""
+            text(
+                """
                 INSERT INTO users (id, email, name, oauth_provider, oauth_id, created_at, updated_at)
                 VALUES (:id, :email, :name, :provider, :oauth_id, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
                 ON CONFLICT (id) DO NOTHING
-            """),
+            """
+            ),
             {
                 "id": user2_id,
                 "email": f"user2-{user2_id}@example.com",
@@ -446,9 +450,7 @@ class TestAuthenticationSecurity:
             "exp": datetime.utcnow() + timedelta(hours=1),
             "iat": datetime.utcnow(),
         }
-        forged_token = jwt.encode(
-            payload, "attacker-secret-key-123456789012", algorithm="HS256"
-        )
+        forged_token = jwt.encode(payload, "attacker-secret-key-123456789012", algorithm="HS256")
 
         async with AsyncClient(app=app, base_url="http://test") as client:
             response = await client.post(

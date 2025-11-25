@@ -2,6 +2,13 @@
 
 **Privacy-First AI Career Coaching Platform**
 
+![CI](https://github.com/JC-02/Ascend/workflows/CI/badge.svg)
+![Security](https://github.com/JC-02/Ascend/workflows/Security/badge.svg)
+![Docker Build](https://github.com/JC-02/Ascend/workflows/Docker%20Build/badge.svg)
+![Coverage](https://codecov.io/gh/JC-02/Ascend/branch/main/graph/badge.svg)
+![Lint](https://github.com/JC-02/Ascend/workflows/Lint/badge.svg)
+![E2E Tests](https://github.com/JC-02/Ascend/workflows/E2E%20Tests/badge.svg)
+
 ## ⚠️ IMPORTANT SECURITY NOTICE
 
 **Before running this project:**

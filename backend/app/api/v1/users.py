@@ -139,5 +139,5 @@ async def create_or_get_user(
         await db.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to create or retrieve user: {str(e)}"
+            detail=f"Failed to create or retrieve user: {str(e)}",
         ) from e

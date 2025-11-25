@@ -29,16 +29,16 @@ router = APIRouter(
     summary="Upload Resume (Not Implemented)",
     description="""
     **This endpoint is not yet implemented.**
-    
+
     This endpoint will be implemented in Epic 2, Story 2.1.
-    
+
     **Planned Functionality:**
     - Accept PDF or DOCX resume files
     - Validate file size (max 5MB) and type
     - Store file in MinIO S3 storage
     - Create database record in `resumes` table
     - Trigger background parsing task
-    
+
     **Returns:** 501 Not Implemented (for now)
     """,
 )
@@ -47,7 +47,7 @@ async def upload_resume(
 ):
     """
     Upload resume endpoint placeholder.
-    
+
     This endpoint is reserved for Epic 2 implementation.
     Returns 501 Not Implemented status.
     """
@@ -57,8 +57,8 @@ async def upload_resume(
             "detail": "Resume upload functionality will be implemented in Epic 2",
             "epic": "EPIC-2: Core Data Ingestion & Session Creation",
             "story": "STORY-2.1: Resume Upload and Processing",
-            "status": "not_implemented"
-        }
+            "status": "not_implemented",
+        },
     )
 
 
@@ -71,14 +71,14 @@ async def upload_resume(
     summary="List User Resumes (Not Implemented)",
     description="""
     **This endpoint is not yet implemented.**
-    
+
     This endpoint will be implemented in Epic 2.
-    
+
     **Planned Functionality:**
     - List all resumes for the authenticated user
     - Include parsing status and metadata
     - Support pagination
-    
+
     **Returns:** 501 Not Implemented (for now)
     """,
 )
@@ -87,7 +87,7 @@ async def list_resumes(
 ):
     """
     List resumes endpoint placeholder.
-    
+
     Returns 501 Not Implemented status.
     """
     return JSONResponse(
@@ -95,6 +95,6 @@ async def list_resumes(
         content={
             "detail": "Resume listing functionality will be implemented in Epic 2",
             "epic": "EPIC-2: Core Data Ingestion & Session Creation",
-            "status": "not_implemented"
-        }
+            "status": "not_implemented",
+        },
     )

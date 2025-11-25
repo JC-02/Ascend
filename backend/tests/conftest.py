@@ -7,16 +7,15 @@
 
 import asyncio
 import uuid
+from collections.abc import AsyncGenerator, Generator
 from datetime import datetime, timedelta
-from typing import AsyncGenerator, Generator
 
 import pytest
 import redis.asyncio as aioredis
 from jose import jwt
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
-from app.db.base import Base
 from app.db.models.user import User
 
 # ============================================
@@ -42,6 +41,7 @@ def event_loop() -> Generator:
 # NOTE: Using a simpler approach for tests that don't require full DB setup
 # For Task 1.4.2, we're testing authentication logic which needs User model
 # but doesn't require relationships to work (Recording, Resume, etc.)
+
 
 @pytest.fixture(scope="session", autouse=True)
 async def setup_test_database():
@@ -90,7 +90,7 @@ async def clear_rate_limits():
         if keys:
             await redis_client.delete(*keys)
         yield
-    except Exception as e:
+    except Exception:
         # If Redis is unavailable, just skip clearing
         # Tests will still run, just with rate limiting applied
         yield
@@ -117,8 +117,9 @@ async def async_db_session(clear_rate_limits) -> AsyncGenerator[AsyncSession, No
             async_db_session.add(user)
             await async_db_session.commit()
     """
-    from app.db.session import AsyncSessionLocal
     from sqlalchemy import text
+
+    from app.db.session import AsyncSessionLocal
 
     async with AsyncSessionLocal() as session:
         # Start a transaction
@@ -174,11 +175,13 @@ async def test_user(async_db_session: AsyncSession, test_user_id: str) -> User:
 
     # Insert user directly with SQL to avoid relationship resolution
     await async_db_session.execute(
-        text("""
+        text(
+            """
             INSERT INTO users (id, email, name, avatar_url, oauth_provider, oauth_id, created_at, updated_at)
             VALUES (:id, :email, :name, :avatar_url, :provider, :oauth_id, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
             ON CONFLICT (id) DO NOTHING
-        """),
+        """
+        ),
         {
             "id": test_user_id,
             "email": test_email,
@@ -186,19 +189,16 @@ async def test_user(async_db_session: AsyncSession, test_user_id: str) -> User:
             "avatar_url": "https://example.com/avatar.jpg",
             "provider": "google",
             "oauth_id": f"oauth_{test_user_id}",
-        }
+        },
     )
     await async_db_session.commit()
 
     # Fetch the user using SQLAlchemy ORM without loading relationships
     # This avoids relationship resolution errors for models that don't exist yet
     from sqlalchemy import select
-    from sqlalchemy.orm import selectinload
 
     # Query without loading any relationships to avoid "Recording" not found error
-    result = await async_db_session.execute(
-        select(User).where(User.id == test_user_id)
-    )
+    result = await async_db_session.execute(select(User).where(User.id == test_user_id))
     user = result.scalar_one_or_none()
 
     assert user is not None, f"Failed to create or retrieve test user with ID {test_user_id}"

@@ -5,9 +5,9 @@
 # Follows CCS Section 8.3 (Secret Management)
 # ============================================
 
+
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from typing import List
 
 
 class Settings(BaseSettings):
@@ -108,7 +108,7 @@ class Settings(BaseSettings):
     )
 
     @property
-    def cors_origins_list(self) -> List[str]:
+    def cors_origins_list(self) -> list[str]:
         """Parse CORS_ORIGINS string into a list"""
         return [origin.strip() for origin in self.cors_origins.split(",")]
 

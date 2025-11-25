@@ -4,11 +4,11 @@
 # Tests for Redis-based rate limiting functionality
 # ============================================
 
+from unittest.mock import AsyncMock, Mock, patch
+
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
-import asyncio
-from unittest.mock import AsyncMock, Mock, patch
 
 from app.middleware.rate_limit import RateLimitMiddleware
 
@@ -92,10 +92,7 @@ async def test_rate_limit_blocks_requests_over_limit():
     results = []
     for i in range(6):
         allowed = await middleware._check_rate_limit(
-            client_ip="192.168.1.100",
-            endpoint="GET:/api/v1/auth/test",
-            limit=5,
-            window=60
+            client_ip="192.168.1.100", endpoint="GET:/api/v1/auth/test", limit=5, window=60
         )
         results.append(allowed)
 
@@ -139,8 +136,9 @@ async def test_rate_limit_different_limits_for_auth():
 
 def test_get_client_ip_from_request():
     """Test client IP extraction from request."""
-    from fastapi import Request
     from unittest.mock import Mock
+
+    from fastapi import Request
 
     app = FastAPI()
     middleware = RateLimitMiddleware(app)
@@ -201,7 +199,9 @@ async def test_rate_limit_fails_open_on_redis_error():
     middleware = RateLimitMiddleware(app)
 
     # Simulate Redis connection failure
-    with patch.object(middleware, '_ensure_redis_connection', new_callable=AsyncMock) as mock_connect:
+    with patch.object(
+        middleware, "_ensure_redis_connection", new_callable=AsyncMock
+    ) as mock_connect:
         mock_connect.return_value = None
         middleware.redis_client = None
 
@@ -229,10 +229,7 @@ async def test_get_remaining_requests():
     middleware.redis_client = mock_redis
 
     remaining = await middleware._get_remaining_requests(
-        client_ip="192.168.1.100",
-        endpoint="GET:/api/v1/test",
-        limit=60,
-        window=60
+        client_ip="192.168.1.100", endpoint="GET:/api/v1/test", limit=60, window=60
     )
 
     # Should have 25 remaining (60 - 35)
@@ -252,10 +249,7 @@ async def test_get_remaining_requests_never_negative():
     middleware.redis_client = mock_redis
 
     remaining = await middleware._get_remaining_requests(
-        client_ip="192.168.1.100",
-        endpoint="GET:/api/v1/test",
-        limit=60,
-        window=60
+        client_ip="192.168.1.100", endpoint="GET:/api/v1/test", limit=60, window=60
     )
 
     # Should be 0, not negative
