@@ -16,7 +16,7 @@ python-multipart==0.0.6  # For file uploads
 # Database
 # ============================================
 sqlalchemy[asyncio]==2.0.23
-asyncpg==0.29.0  # Async PostgreSQL driver
+asyncpg>=0.29.0
 alembic==1.12.1  # Database migrations
 pgvector==0.2.3  # Vector similarity search
 psycopg2-binary>=2.9.9

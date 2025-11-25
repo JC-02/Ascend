@@ -39,7 +39,7 @@ jobs:
     # Move env HERE (job level)
     env:
       # Database
-      DATABASE_URL: postgresql://test:test@localhost:5432/test_db
+      DATABASE_URL: postgresql+asyncpg://test:test@localhost:5432/test_db
       
       # Redis
       REDIS_URL: redis://localhost:6379/0
@@ -84,6 +84,7 @@ jobs:
         pip install -r requirements.txt
         pip install pytest pytest-asyncio httpx
         pip install psycopg2-binary
+        pip install asyncpg
     
     - name: Run tests
       run: |
