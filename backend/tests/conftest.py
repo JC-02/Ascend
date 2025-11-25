@@ -35,22 +35,22 @@ pytest_plugins = []
 async def setup_test_database():
     """
     Setup test database.
-
-    NOTE: For the MVP, we're using the main database which already has
-    tables created via Alembic migrations. This fixture is just a placeholder
-    for future test database setup if needed.
-
-    In production, you would:
-    1. Create a separate test database
-    2. Run migrations on it
-    3. Clean up after tests
+    
+    Creates all database tables before each test function runs.
+    This ensures the test database has the required schema.
     """
-    # Database schema is already created via Alembic migrations
-    # No additional setup needed for MVP
+    from app.db.session import engine
+    from app.db.base import Base
+    
+    # Create all tables
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    
     yield
-
-    # Optionally, clean up test data after all tests complete
-    # For now, we'll keep test data for debugging
+    
+    # Drop all tables after test to ensure clean state
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
 
 
 @pytest.fixture(scope="function")
