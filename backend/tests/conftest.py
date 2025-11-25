@@ -155,53 +155,34 @@ def test_user_id() -> str:
 
 @pytest.fixture
 async def test_user(async_db_session: AsyncSession, test_user_id: str) -> User:
-    """
-    Create and persist a test user in the database.
-
-    Returns a User ORM object that can be used in tests.
-    Per CCS Section 7.6, this is a reusable fixture for user-related tests.
-
-    NOTE: Using text SQL to avoid triggering relationship resolution errors
-    for models that don't exist yet (Recording, Feedback, etc.)
-
-    Usage:
-        async def test_user_endpoint(test_user: User):
-            assert test_user.email.startswith("test-")
-    """
+    """Create a test user for authentication tests."""
     from sqlalchemy import text
-
-    # Use unique email per test to avoid conflicts
-    test_email = f"test-{test_user_id}@example.com"
-
-    # Insert user directly with SQL to avoid relationship resolution
+    from app.db.models.user import User
+    
+    # Insert user using raw SQL
     await async_db_session.execute(
         text(
             """
             INSERT INTO users (id, email, name, avatar_url, oauth_provider, oauth_id, created_at, updated_at)
-            VALUES (:id, :email, :name, :avatar_url, :provider, :oauth_id, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+            VALUES (:id, :email, :name, :avatar_url, :oauth_provider, :oauth_id, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
             ON CONFLICT (id) DO NOTHING
         """
         ),
         {
             "id": test_user_id,
-            "email": test_email,
+            "email": f"test-{test_user_id}@example.com",
             "name": "Test User",
             "avatar_url": "https://example.com/avatar.jpg",
-            "provider": "google",
+            "oauth_provider": "google",
             "oauth_id": f"oauth_{test_user_id}",
         },
     )
-    await async_db_session.commit()
-
-    # Fetch the user using SQLAlchemy ORM without loading relationships
-    # This avoids relationship resolution errors for models that don't exist yet
-    from sqlalchemy import select
-
-    # Query without loading any relationships to avoid "Recording" not found error
+    await async_db_session.flush()  # Change from commit() to flush()
+    
+    # Fetch the user
     result = await async_db_session.execute(select(User).where(User.id == test_user_id))
-    user = result.scalar_one_or_none()
-
-    assert user is not None, f"Failed to create or retrieve test user with ID {test_user_id}"
+    user = result.scalar_one()
+    
     return user
 
 
