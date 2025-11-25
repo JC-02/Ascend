@@ -4,15 +4,14 @@
 # Pytest configuration and shared fixtures
 # Follows CCS Section 7.6 (Test Fixtures & Mocking)
 # ============================================
-
 import asyncio
 import uuid
 from collections.abc import AsyncGenerator, Generator
 from datetime import datetime, timedelta
 
 import pytest
-import redis.asyncio as aioredis
 from jose import jwt
+from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
@@ -38,110 +37,48 @@ def event_loop() -> Generator:
 # ============================================
 # Database Fixtures
 # ============================================
-# NOTE: Using a simpler approach for tests that don't require full DB setup
-# For Task 1.4.2, we're testing authentication logic which needs User model
-# but doesn't require relationships to work (Recording, Resume, etc.)
-
 
 @pytest.fixture(scope="session", autouse=True)
 async def setup_test_database():
-    """
-    Setup test database.
-
-    NOTE: For the MVP, we're using the main database which already has
-    tables created via Alembic migrations. This fixture is just a placeholder
-    for future test database setup if needed.
-
-    In production, you would:
-    1. Create a separate test database
-    2. Run migrations on it
-    3. Clean up after tests
-    """
-    # Database schema is already created via Alembic migrations
-    # No additional setup needed for MVP
+    """Set up test database with tables."""
+    from app.db.session import engine
+    from app.db.base import Base
+    
+    # Create all tables
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    
     yield
-
-    # Optionally, clean up test data after all tests complete
-    # For now, we'll keep test data for debugging
+    
+    # Drop all tables after tests
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
 
 
 @pytest.fixture(scope="function")
 async def clear_rate_limits():
-    """
-    Clear rate limiting keys from Redis before each test.
-
-    This prevents rate limiting from blocking test execution.
-    Tests run in quick succession and would otherwise hit rate limits.
-
-    Usage:
-        async def test_auth(clear_rate_limits):
-            # Rate limits are cleared before this test runs
-            ...
-    """
-    redis_client = None
-    try:
-        redis_client = await aioredis.from_url(
-            settings.redis_url,
-            encoding="utf-8",
-            decode_responses=True,
-        )
-        # Clear all rate limit keys
-        keys = await redis_client.keys("rate_limit:*")
-        if keys:
-            await redis_client.delete(*keys)
-        yield
-    except Exception:
-        # If Redis is unavailable, just skip clearing
-        # Tests will still run, just with rate limiting applied
-        yield
-    finally:
-        if redis_client:
-            await redis_client.aclose()
+    """Clear rate limits before each test."""
+    from app.core.cache import cache
+    
+    # Clear all rate limit keys
+    await cache.clear_pattern("rate_limit:*")
+    yield
+    # Clear again after test
+    await cache.clear_pattern("rate_limit:*")
 
 
 @pytest.fixture(scope="function")
 async def async_db_session(clear_rate_limits) -> AsyncGenerator[AsyncSession, None]:
     """
-    Create an async database session for testing with automatic cleanup.
-
-    This fixture creates a session with transaction rollback to ensure
-    test isolation. Each test gets a clean database state.
-
-    For Story 1.4 (Authentication), we only need:
-    - User model to exist in database
-    - No need for Recording, Feedback, or other models yet
-
-    Usage:
-        async def test_something(async_db_session: AsyncSession):
-            user = User(...)
-            async_db_session.add(user)
-            await async_db_session.commit()
+    Create a test database session.
+    Each test gets a fresh session that's rolled back after the test.
     """
-    from sqlalchemy import text
-
-    from app.db.session import AsyncSessionLocal
-
-    async with AsyncSessionLocal() as session:
-        # Start a transaction
+    from app.db.session import async_session_maker
+    
+    async with async_session_maker() as session:
         async with session.begin():
-            try:
-                yield session
-                # Rollback the transaction after the test
-                await session.rollback()
-            except Exception:
-                # Ensure rollback on error
-                await session.rollback()
-                raise
-            finally:
-                # Clean up any test users that might have been created
-                try:
-                    await session.execute(
-                        text("DELETE FROM users WHERE email LIKE 'test-%@example.com'")
-                    )
-                    await session.commit()
-                except Exception:
-                    pass
-                await session.close()
+            yield session
+            await session.rollback()
 
 
 # ============================================
@@ -149,16 +86,13 @@ async def async_db_session(clear_rate_limits) -> AsyncGenerator[AsyncSession, No
 # ============================================
 @pytest.fixture
 def test_user_id() -> str:
-    """Generate a test user ID (UUID)."""
+    """Generate a unique user ID for each test."""
     return str(uuid.uuid4())
 
 
 @pytest.fixture
 async def test_user(async_db_session: AsyncSession, test_user_id: str) -> User:
     """Create a test user for authentication tests."""
-    from sqlalchemy import select, text
-    from app.db.models.user import User
-    
     # Insert user using raw SQL
     await async_db_session.execute(
         text(
@@ -188,21 +122,13 @@ async def test_user(async_db_session: AsyncSession, test_user_id: str) -> User:
 
 @pytest.fixture
 def test_user_data() -> dict:
-    """
-    Mock user data for testing (without database persistence).
-
-    Returns a dictionary with user attributes that can be used
-    to create User objects or test serialization.
-    """
+    """Sample user data for testing."""
     return {
-        "id": str(uuid.uuid4()),
         "email": "test@example.com",
         "name": "Test User",
         "avatar_url": "https://example.com/avatar.jpg",
         "oauth_provider": "google",
-        "oauth_id": "test_oauth_123",
-        "created_at": datetime.now(),
-        "updated_at": datetime.now(),
+        "oauth_id": "test_oauth_id",
     }
 
 
@@ -211,100 +137,47 @@ def test_user_data() -> dict:
 # ============================================
 @pytest.fixture
 def valid_jwt_token(test_user_id: str) -> str:
-    """
-    Generate a valid JWT token for testing authentication.
-
-    Creates a JWT token signed with NEXTAUTH_SECRET that contains
-    the test user's ID in the "sub" claim.
-
-    Per CCS Section 7.6, this fixture enables testing of protected endpoints.
-
-    Usage:
-        def test_protected_endpoint(valid_jwt_token: str):
-            headers = {"Authorization": f"Bearer {valid_jwt_token}"}
-            response = client.get("/api/v1/protected", headers=headers)
-            assert response.status_code == 200
-    """
+    """Generate a valid JWT token for testing."""
     payload = {
-        "sub": test_user_id,  # User ID in subject claim
-        "exp": datetime.utcnow() + timedelta(hours=1),  # Expires in 1 hour
-        "iat": datetime.utcnow(),  # Issued now
+        "sub": test_user_id,
+        "exp": datetime.utcnow() + timedelta(hours=1),
+        "iat": datetime.utcnow(),
     }
-    token = jwt.encode(payload, settings.nextauth_secret, algorithm="HS256")
-    return token
+    return jwt.encode(payload, settings.nextauth_secret, algorithm="HS256")
 
 
 @pytest.fixture
 def expired_jwt_token(test_user_id: str) -> str:
-    """
-    Generate an expired JWT token for testing error handling.
-
-    Creates a JWT token that has already expired, useful for testing
-    401 responses when tokens are no longer valid.
-
-    Usage:
-        def test_expired_token(expired_jwt_token: str):
-            headers = {"Authorization": f"Bearer {expired_jwt_token}"}
-            response = client.get("/api/v1/protected", headers=headers)
-            assert response.status_code == 401
-    """
+    """Generate an expired JWT token for testing."""
     payload = {
         "sub": test_user_id,
-        "exp": datetime.utcnow() - timedelta(hours=1),  # Expired 1 hour ago
-        "iat": datetime.utcnow() - timedelta(hours=2),  # Issued 2 hours ago
+        "exp": datetime.utcnow() - timedelta(hours=1),
+        "iat": datetime.utcnow() - timedelta(hours=2),
     }
-    token = jwt.encode(payload, settings.nextauth_secret, algorithm="HS256")
-    return token
+    return jwt.encode(payload, settings.nextauth_secret, algorithm="HS256")
 
 
 @pytest.fixture
 def invalid_jwt_token() -> str:
-    """
-    Generate an invalid JWT token (wrong signature) for testing.
-
-    Creates a JWT token signed with a different secret, which will
-    fail signature verification.
-
-    Usage:
-        def test_invalid_token(invalid_jwt_token: str):
-            headers = {"Authorization": f"Bearer {invalid_jwt_token}"}
-            response = client.get("/api/v1/protected", headers=headers)
-            assert response.status_code == 401
-    """
+    """Generate an invalid JWT token (wrong secret)."""
     payload = {
         "sub": str(uuid.uuid4()),
         "exp": datetime.utcnow() + timedelta(hours=1),
         "iat": datetime.utcnow(),
     }
-    # Sign with WRONG secret to simulate tampered token
-    token = jwt.encode(payload, "wrong-secret-key-for-testing", algorithm="HS256")
-    return token
+    return jwt.encode(payload, "wrong-secret", algorithm="HS256")
 
 
 @pytest.fixture
 def auth_headers(valid_jwt_token: str) -> dict:
-    """
-    Generate HTTP headers with a valid Bearer token.
-
-    Convenience fixture that creates properly formatted Authorization headers
-    for authenticated API requests.
-
-    Usage:
-        def test_with_auth(auth_headers: dict):
-            response = client.get("/api/v1/protected", headers=auth_headers)
-            assert response.status_code == 200
-    """
+    """Generate authentication headers with a valid token."""
     return {"Authorization": f"Bearer {valid_jwt_token}"}
 
 
 @pytest.fixture
 def malformed_jwt_token() -> str:
-    """
-    Generate a malformed JWT token for testing error handling.
-
-    Returns a string that looks like a token but is not valid JWT format.
-    """
-    return "this.is.not.a.valid.jwt.token"
+    """Generate a malformed JWT token."""
+    return "not.a.valid.jwt.token"
 
 
 # ============================================
@@ -312,18 +185,13 @@ def malformed_jwt_token() -> str:
 # ============================================
 @pytest.fixture
 def mock_llm_response() -> dict:
-    """
-    Mock LLM API response for testing AI-related features.
-
-    Per CCS Section 7.6, this fixture will be used in future tests
-    for agent and LLM provider functionality.
-    """
+    """Mock LLM API response."""
     return {
         "choices": [
             {
                 "message": {
+                    "content": "This is a mock response from the LLM.",
                     "role": "assistant",
-                    "content": "This is a mock LLM response for testing.",
                 }
             }
         ]
@@ -332,13 +200,5 @@ def mock_llm_response() -> dict:
 
 @pytest.fixture
 def mock_whisper_response() -> dict:
-    """
-    Mock Whisper transcription response for testing.
-
-    Per CCS Section 7.6, this fixture will be used in future tests
-    for audio transcription functionality.
-    """
-    return {
-        "text": "This is a mock transcription of the audio.",
-        "language": "en",
-    }
+    """Mock Whisper API response."""
+    return {"text": "This is a mock transcription from Whisper."}

@@ -7,7 +7,7 @@ on:
     branches: [main, develop]
 
 jobs:
-  backend-tests:
+  backend:
     runs-on: ubuntu-latest
     
     services:
@@ -78,11 +78,15 @@ jobs:
           pip install --upgrade pip
           pip install -r requirements.txt
       
+      - name: Wait for PostgreSQL
+        run: |
+          timeout 30 bash -c 'until pg_isready -h localhost -p 5432 -U test; do sleep 1; done'
+      
       - name: Run tests
         working-directory: ./backend
         run: pytest --cov=app --cov-report=xml --cov-report=term
 
-  frontend-tests:
+  frontend:
     runs-on: ubuntu-latest
     
     steps:
