@@ -132,7 +132,7 @@ class TokenCache:
             await self.redis_client.setex(cache_key, ttl_seconds, cached_value)
 
             logger.debug(
-                f"Cached user data for token (key: {cache_key[:16]}..., " f"ttl: {ttl_seconds}s)"
+                f"Cached user data for token (key: {cache_key[:16]}..., ttl: {ttl_seconds}s)"
             )
             return True
 

@@ -66,7 +66,7 @@ class TestAuthVerifyEndpoint:
 
         # Assert status code
         assert response.status_code == status.HTTP_200_OK, (
-            f"Expected 200 OK, got {response.status_code}. " f"Response: {response.text}"
+            f"Expected 200 OK, got {response.status_code}. Response: {response.text}"
         )
 
         # Assert response body
@@ -110,16 +110,16 @@ class TestAuthVerifyEndpoint:
             )
 
         # Assert status code
-        assert (
-            response.status_code == status.HTTP_401_UNAUTHORIZED
-        ), f"Expected 401 Unauthorized, got {response.status_code}"
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED, (
+            f"Expected 401 Unauthorized, got {response.status_code}"
+        )
 
         # Assert error response structure
         data = response.json()
         assert "detail" in data, "Response missing 'detail' field"
-        assert (
-            "Invalid authentication token" in data["detail"]
-        ), "Error detail should mention invalid token"
+        assert "Invalid authentication token" in data["detail"], (
+            "Error detail should mention invalid token"
+        )
 
     @pytest.mark.asyncio
     async def test_verify_with_invalid_signature_returns_401(

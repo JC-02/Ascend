@@ -5,9 +5,8 @@
 # Follows CCS Section 7.6 (Test Fixtures & Mocking)
 # ============================================
 
-import asyncio
 import uuid
-from collections.abc import AsyncGenerator, Generator
+from collections.abc import AsyncGenerator
 from datetime import datetime, timedelta
 
 import pytest
@@ -22,17 +21,6 @@ from app.db.models.user import User
 # Pytest Configuration
 # ============================================
 pytest_plugins = []
-
-
-@pytest.fixture(scope="session")
-def event_loop() -> Generator:
-    """
-    Create an event loop for the test session.
-    Required for async tests.
-    """
-    loop = asyncio.get_event_loop_policy().new_event_loop()
-    yield loop
-    loop.close()
 
 
 # ============================================
