@@ -19,6 +19,7 @@ sqlalchemy[asyncio]==2.0.23
 asyncpg==0.29.0  # Async PostgreSQL driver
 alembic==1.12.1  # Database migrations
 pgvector==0.2.3  # Vector similarity search
+psycopg2-binary>=2.9.9
 
 # ============================================
 # Data Validation
