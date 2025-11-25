@@ -47,7 +47,7 @@ class InterviewSession(Base, UUIDMixin, TimestampMixin):
 
     # Session Data
     job_description: Mapped[str] = mapped_column(Text, nullable=False)
-    generated_questions: Mapped[dict] = mapped_column(JSONB, nullable=True, server_default=text("'[]'::jsonb"))
+    generated_questions: Mapped[dict] = mapped_column(JSONB, nullable=True, server_default=text("'[]'"))
     question_count: Mapped[int] = mapped_column(Integer, nullable=False, default=5)
     status: Mapped[str] = mapped_column(String(50), nullable=False, default="pending", index=True)
 
