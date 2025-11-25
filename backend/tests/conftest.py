@@ -31,7 +31,7 @@ pytest_plugins = []
 # but doesn't require relationships to work (Recording, Resume, etc.)
 
 
-@pytest.fixture(scope="session", autouse=True)
+@pytest.fixture(scope="function", autouse=True)
 async def setup_test_database():
     """
     Setup test database.
