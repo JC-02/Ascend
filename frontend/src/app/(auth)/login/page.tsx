@@ -61,9 +61,7 @@ export default function LoginPage() {
       <div className="relative z-10 w-full max-w-md px-4">
         {/* Logo/Brand Section */}
         <div className="mb-8 text-center">
-          <h1 className="mb-2 text-4xl font-bold tracking-tight text-white">
-            Ascend AI
-          </h1>
+          <h1 className="mb-2 text-4xl font-bold tracking-tight text-white">Ascend AI</h1>
           <p className="text-lg text-slate-400">
             Master your <span className="text-primary">Interview Skills</span>
           </p>
@@ -72,9 +70,7 @@ export default function LoginPage() {
         {/* Login Card */}
         <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-sm">
           <CardHeader className="space-y-1 text-center">
-            <CardTitle className="text-2xl font-semibold text-slate-200">
-              Welcome Back
-            </CardTitle>
+            <CardTitle className="text-2xl font-semibold text-slate-200">Welcome Back</CardTitle>
             <CardDescription className="text-slate-400">
               Sign in to continue your interview preparation
             </CardDescription>
@@ -82,7 +78,7 @@ export default function LoginPage() {
           <CardContent className="space-y-4">
             {/* Error Alert */}
             {error && (
-              <Alert variant="destructive" className="bg-red-950/50 border-red-900">
+              <Alert variant="destructive" className="border-red-900 bg-red-950/50">
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
@@ -151,8 +147,8 @@ export default function LoginPage() {
               size="sm"
               className="w-full text-slate-400 hover:text-slate-200"
               onClick={() => {
-                document.cookie = "ascend_dev_token=true; path=/";
-                window.location.href = "/dashboard";
+                document.cookie = 'ascend_dev_token=true; path=/';
+                window.location.href = '/dashboard';
               }}
             >
               Developer Login (Bypass)
@@ -161,10 +157,10 @@ export default function LoginPage() {
             <Button
               variant="ghost"
               size="sm"
-              className="w-full text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"
+              className="w-full text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"
               onClick={() => {
                 // TODO: Implement account creation
-                window.location.href = "/register";
+                window.location.href = '/register';
               }}
             >
               Create Account

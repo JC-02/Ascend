@@ -15,7 +15,7 @@ interface UserMenuProps {
 
 /**
  * UserMenu Component - User Dropdown Menu
- * 
+ *
  * Features:
  * - Avatar with dropdown
  * - Profile, Settings, Help, Sign Out
@@ -29,29 +29,42 @@ export function UserMenu({ className }: UserMenuProps) {
 
   useEffect(() => {
     // Check for dev token if no session
-    if (!session && typeof document !== 'undefined' && document.cookie.includes('ascend_dev_token=true')) {
+    if (
+      !session &&
+      typeof document !== 'undefined' &&
+      document.cookie.includes('ascend_dev_token=true')
+    ) {
       setIsDev(true);
     }
   }, [session]);
 
-  const user = session?.user || (isDev ? {
-    name: 'Developer',
-    email: 'dev@local',
-    image: null,
-  } : {
-    name: 'Guest',
-    email: '',
-    image: null,
-  });
+  const user =
+    session?.user ||
+    (isDev
+      ? {
+          name: 'Developer',
+          email: 'dev@local',
+          image: null,
+        }
+      : {
+          name: 'Guest',
+          email: '',
+          image: null,
+        });
 
   const initials = user.name
-    ? user.name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2)
+    ? user.name
+        .split(' ')
+        .map((n) => n[0])
+        .join('')
+        .toUpperCase()
+        .slice(0, 2)
     : '??';
 
   const handleSignOut = () => {
     if (isDev) {
-      document.cookie = "ascend_dev_token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT";
-      window.location.href = "/login";
+      document.cookie = 'ascend_dev_token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT';
+      window.location.href = '/login';
     } else {
       signOut();
     }
@@ -87,7 +100,7 @@ export function UserMenu({ className }: UserMenuProps) {
           align="end"
         >
           {/* User Info */}
-          <div className="px-3 py-2 border-b">
+          <div className="border-b px-3 py-2">
             <p className="text-sm font-medium">{user.name}</p>
             <p className="text-xs text-muted-foreground">{user.email}</p>
           </div>
@@ -97,7 +110,7 @@ export function UserMenu({ className }: UserMenuProps) {
             <Link
               href="/dashboard/profile"
               className={cn(
-                'flex items-center gap-2 px-3 py-2 rounded-md text-sm',
+                'flex items-center gap-2 rounded-md px-3 py-2 text-sm',
                 'cursor-pointer outline-none',
                 'focus:bg-accent focus:text-accent-foreground'
               )}
@@ -111,7 +124,7 @@ export function UserMenu({ className }: UserMenuProps) {
             <Link
               href="/dashboard/settings"
               className={cn(
-                'flex items-center gap-2 px-3 py-2 rounded-md text-sm',
+                'flex items-center gap-2 rounded-md px-3 py-2 text-sm',
                 'cursor-pointer outline-none',
                 'focus:bg-accent focus:text-accent-foreground'
               )}
@@ -125,7 +138,7 @@ export function UserMenu({ className }: UserMenuProps) {
             <Link
               href="/dashboard/support"
               className={cn(
-                'flex items-center gap-2 px-3 py-2 rounded-md text-sm',
+                'flex items-center gap-2 rounded-md px-3 py-2 text-sm',
                 'cursor-pointer outline-none',
                 'focus:bg-accent focus:text-accent-foreground'
               )}
@@ -135,11 +148,11 @@ export function UserMenu({ className }: UserMenuProps) {
             </Link>
           </DropdownMenu.Item>
 
-          <DropdownMenu.Separator className="h-px bg-border my-1" />
+          <DropdownMenu.Separator className="my-1 h-px bg-border" />
 
           <DropdownMenu.Item
             className={cn(
-              'flex items-center gap-2 px-3 py-2 rounded-md text-sm',
+              'flex items-center gap-2 rounded-md px-3 py-2 text-sm',
               'cursor-pointer outline-none',
               'text-destructive focus:bg-destructive focus:text-destructive-foreground'
             )}

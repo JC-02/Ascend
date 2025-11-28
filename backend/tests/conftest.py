@@ -130,7 +130,7 @@ async def async_db_session(clear_rate_limits) -> AsyncGenerator[AsyncSession, No
         finally:
             # Rollback any pending transaction from the test
             await session.rollback()
-            
+
             # Clean up any test users that might have been created
             # This needs to happen in a new transaction or after rollback
             try:
