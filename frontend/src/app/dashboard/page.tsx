@@ -21,19 +21,8 @@ import { useEffect, useState } from 'react';
 
 export default function DashboardPage() {
   const { data: session } = useSession();
-  const [isDev, setIsDev] = useState(false);
 
-  useEffect(() => {
-    if (
-      !session &&
-      typeof document !== 'undefined' &&
-      document.cookie.includes('ascend_dev_token=true')
-    ) {
-      setIsDev(true);
-    }
-  }, [session]);
-
-  const user = session?.user || (isDev ? { name: 'Developer' } : null);
+  const user = session?.user;
   const firstName = user?.name?.split(' ')[0] || 'there';
 
   return (
