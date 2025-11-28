@@ -5,9 +5,8 @@
 # Follows CCS Section 7.6 (Test Fixtures & Mocking)
 # ============================================
 
-import asyncio
 import uuid
-from collections.abc import AsyncGenerator, Generator
+from collections.abc import AsyncGenerator
 from datetime import datetime, timedelta
 
 import pytest
