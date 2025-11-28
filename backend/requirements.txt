@@ -2,7 +2,7 @@
 # Ascend AI - Backend Dependencies
 # ============================================
 # Python dependencies for FastAPI backend
-# All versions pinned per Directive 8.4
+# All versions set to latest per Directive 8.4
 # ============================================
 
 # ============================================

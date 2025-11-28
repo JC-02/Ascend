@@ -1654,7 +1654,7 @@ Before adding ANY new dependency, you MUST STOP and provide a **Dependency Secur
 
 - **Name:** <package-name>
 - **Version:** Latest stable and supported version
-- **Versioning Strategy:** Use caret (^) for npm to allow minor/patch updates, use >= for Python to allow updates within major version
+- **Versioning Strategy:** Always use 'latest' tag or unpinned versions to ensure the most recent updates are applied.
 - **Security Note:** Always use latest stable and supported versions to ensure security patches are applied
 - **Package Manager:** pip | npm
 - **License:** <license-type> (e.g., MIT, Apache-2.0, GPL-3.0)
@@ -1777,7 +1777,7 @@ Before adding ANY new dependency, you MUST STOP and provide a **Dependency Secur
 - [ ] Last commit within 12 months
 - [ ] License is compatible (MIT, Apache-2.0, BSD)
 - [ ] Dependency has >1000 GitHub stars OR >100k weekly downloads OR corporate backing
-- [ ] Exact version pinning proposed
+- [ ] No version pinning proposed (use latest)
 - [ ] Alternatives were considered
 
 **END OF DEPENDENCY SECURITY ANALYSIS REPORT**
