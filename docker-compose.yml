@@ -3,7 +3,7 @@ services:
   # PostgreSQL Database
   # ============================================
   postgres:
-    image: postgres:16
+    image: postgres:latest
     container_name: ascend-postgres
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
@@ -25,7 +25,7 @@ services:
   # Redis Cache & Message Queue
   # ============================================
   redis:
-    image: redis:7-alpine
+    image: redis:latest
     container_name: ascend-redis
     ports:
       - "6379:6379"
@@ -43,7 +43,7 @@ services:
   # MinIO Object Storage (S3-compatible)
   # ============================================
   minio:
-    image: minio/minio
+    image: minio/minio:latest
     container_name: ascend-minio
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minio_access_key}
@@ -66,7 +66,7 @@ services:
   # MinIO Bucket Initialization
   # ============================================
   minio-init:
-    image: minio/mc
+    image: minio/mc:latest
     container_name: ascend-minio-init
     depends_on:
       minio:

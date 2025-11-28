@@ -1,0 +1,74 @@
+# To get started with Dependabot version updates, you'll need to specify which
+# package ecosystems to update and where the package manifests are located.
+# Please see the documentation for all configuration options:
+# https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+
+version: 2
+updates:
+  # Enable version updates for npm (Frontend)
+  - package-ecosystem: "npm"
+    # Look for `package.json` and `lock` files in the `frontend` directory
+    directory: "/frontend"
+    # Check the npm registry for updates weekly
+    schedule:
+      interval: "weekly"
+    # Limit number of open PRs to avoid noise
+    open-pull-requests-limit: 10
+    # Add labels to PRs
+    labels:
+      - "dependencies"
+      - "frontend"
+
+  # Enable version updates for pip (Backend)
+  - package-ecosystem: "pip"
+    # Look for `requirements.txt` in the `backend` directory
+    directory: "/backend"
+    # Check PyPI for updates weekly
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "backend"
+
+  # Enable version updates for Docker
+  - package-ecosystem: "docker"
+    # Look for `Dockerfile` in the `root` directory
+    directory: "/"
+    # Check for updates weekly
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependencies"
+      - "docker"
+
+  # Enable version updates for Docker (Frontend)
+  - package-ecosystem: "docker"
+    directory: "/frontend"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependencies"
+      - "docker"
+      - "frontend"
+
+  # Enable version updates for Docker (Backend)
+  - package-ecosystem: "docker"
+    directory: "/backend"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependencies"
+      - "docker"
+      - "backend"
+
+  # Enable version updates for GitHub Actions
+  - package-ecosystem: "github-actions"
+    # Look for workflow files in the `.github/workflows` directory
+    directory: "/"
+    # Check for updates weekly
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependencies"
+      - "github_actions"
