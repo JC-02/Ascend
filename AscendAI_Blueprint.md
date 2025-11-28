@@ -6,8 +6,8 @@ This is the exportable, complete document intended to be the single source of tr
 
 ### **The Ascend AI Blueprint V3.2: Vision, Product, & Engineering**
 
-*   **Document Version:** 3.2 (Final for MVP)
-*   **Date:** November 18, 2025
+*   **Document Version:** 3.3 (Final for MVP)
+*   **Date:** November 28, 2025
 *   **Status:** Approved for Development. This document is the single source of truth.
 
 ---
@@ -154,7 +154,7 @@ The system is a decoupled, service-oriented architecture. A **Next.js Frontend**
 ### **6.0 Development Roadmap & Milestones**
 
 **6.1 MVP Development Plan (12-Week Sprints):**
-*   **Weeks 1-2 (Sprint 1: The Skeleton):** Goal: User can sign up and log in. Deliverables: Authenticated frontend/backend deployed.
+*   **Weeks 1-2 (Sprint 1: The Skeleton):** Goal: User can sign up and log in. Deliverables: Authenticated frontend/backend deployed, CI/CD pipelines established, E2E testing framework.
 *   **Weeks 3-4 (Sprint 2: Core Ingestion):** Goal: User can upload a resume/JD and see parsed data. Deliverables: File upload pipeline and basic Gap Analysis UI.
 *   **Weeks 5-6 (Sprint 3: The RAG & Agent Core):** Goal: Agent can answer a question using the knowledge base. Deliverables: Vector DB setup, RAG pipeline, and basic agent chat UI.
 *   **Weeks 7-8 (Sprint 4: The Audio Pipeline):** Goal: User can record audio and see a transcript. Deliverables: In-browser recording, upload to storage, and Whisper transcription job working end-to-end.
