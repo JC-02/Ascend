@@ -126,7 +126,7 @@ class TokenCache:
             cache_key = self._get_cache_key(token)
 
             # Serialize user data
-            cached_value = json.dumps(user_data)
+            cached_value = json.dumps(user_data, default=str)
 
             # Store in cache with expiration
             await self.redis_client.setex(cache_key, ttl_seconds, cached_value)

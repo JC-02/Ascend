@@ -122,26 +122,25 @@ async def async_db_session(clear_rate_limits) -> AsyncGenerator[AsyncSession, No
     from app.db.session import AsyncSessionLocal
 
     async with AsyncSessionLocal() as session:
-        # Start a transaction
-        async with session.begin():
+        try:
+            yield session
+        except Exception:
+            await session.rollback()
+            raise
+        finally:
+            # Rollback any pending transaction from the test
+            await session.rollback()
+            
+            # Clean up any test users that might have been created
+            # This needs to happen in a new transaction or after rollback
             try:
-                yield session
-                # Rollback the transaction after the test
-                await session.rollback()
+                await session.execute(
+                    text("DELETE FROM users WHERE email LIKE 'test-%@example.com'")
+                )
+                await session.commit()
             except Exception:
-                # Ensure rollback on error
-                await session.rollback()
-                raise
-            finally:
-                # Clean up any test users that might have been created
-                try:
-                    await session.execute(
-                        text("DELETE FROM users WHERE email LIKE 'test-%@example.com'")
-                    )
-                    await session.commit()
-                except Exception:
-                    pass
-                await session.close()
+                # Ignore cleanup errors
+                pass
 
 
 # ============================================
