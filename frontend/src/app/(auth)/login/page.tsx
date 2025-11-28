@@ -133,38 +133,7 @@ export default function LoginPage() {
               Continue with GitHub
             </Button>
 
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-slate-700" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-slate-900 px-2 text-slate-500">Development</span>
-              </div>
-            </div>
 
-            <Button
-              variant="ghost"
-              size="sm"
-              className="w-full text-slate-400 hover:text-slate-200"
-              onClick={() => {
-                document.cookie = 'ascend_dev_token=true; path=/';
-                window.location.href = '/dashboard';
-              }}
-            >
-              Developer Login (Bypass)
-            </Button>
-
-            <Button
-              variant="ghost"
-              size="sm"
-              className="w-full text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"
-              onClick={() => {
-                // TODO: Implement account creation
-                window.location.href = '/register';
-              }}
-            >
-              Create Account
-            </Button>
 
             {/* New User Info */}
             <p className="px-4 text-center text-xs text-slate-500">

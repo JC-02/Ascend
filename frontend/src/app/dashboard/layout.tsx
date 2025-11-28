@@ -14,7 +14,7 @@ import { SidebarNav } from '@/components/layout/sidebar-nav';
 
 // Navigation items moved to sidebar-nav.tsx
 
-import { cookies } from 'next/headers';
+
 
 // ...
 
@@ -25,11 +25,10 @@ export default async function ProtectedDashboardLayout({
 }) {
   // Check for valid session
   const session = await auth();
-  const cookieStore = cookies();
-  const isDev = cookieStore.get('ascend_dev_token')?.value === 'true';
-
-  // Allow guest users to access dashboard
-  // They will see prompts to sign in on individual pages
+  
+  if (!session?.user) {
+    redirect('/login');
+  }
 
   return <DashboardLayout sidebar={<SidebarNav />}>{children}</DashboardLayout>;
 }
