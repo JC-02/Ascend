@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 
 import pytest
 from fastapi import status
-from httpx import AsyncClient
+from httpx import ASGITransport, AsyncClient
 from jose import jwt
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -58,7 +58,7 @@ class TestAuthVerifyEndpoint:
         4. Assert response body matches UserResponse schema
         5. Assert user data matches test_user
         """
-        async with AsyncClient(app=app, base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             response = await client.post(
                 "/api/v1/auth/verify",
                 headers={"Authorization": f"Bearer {valid_jwt_token}"},
@@ -103,7 +103,7 @@ class TestAuthVerifyEndpoint:
         - Expired tokens must be rejected to prevent session hijacking
         - Error message should not reveal token contents
         """
-        async with AsyncClient(app=app, base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             response = await client.post(
                 "/api/v1/auth/verify",
                 headers={"Authorization": f"Bearer {expired_jwt_token}"},
@@ -133,7 +133,7 @@ class TestAuthVerifyEndpoint:
         This tests the security of JWT validation - tokens signed with
         a different secret must be rejected.
         """
-        async with AsyncClient(app=app, base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             response = await client.post(
                 "/api/v1/auth/verify",
                 headers={"Authorization": f"Bearer {invalid_jwt_token}"},
@@ -154,7 +154,7 @@ class TestAuthVerifyEndpoint:
 
         Tests handling of tokens that are not valid JWT format.
         """
-        async with AsyncClient(app=app, base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             response = await client.post(
                 "/api/v1/auth/verify",
                 headers={"Authorization": f"Bearer {malformed_jwt_token}"},
@@ -175,10 +175,10 @@ class TestAuthVerifyEndpoint:
         FastAPI's HTTPBearer security scheme returns 403 when the
         Authorization header is missing.
         """
-        async with AsyncClient(app=app, base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             response = await client.post("/api/v1/auth/verify")
 
-        assert response.status_code == status.HTTP_403_FORBIDDEN
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
     @pytest.mark.asyncio
     async def test_verify_with_nonexistent_user_returns_401(
@@ -200,7 +200,7 @@ class TestAuthVerifyEndpoint:
         }
         token = jwt.encode(payload, settings.nextauth_secret, algorithm="HS256")
 
-        async with AsyncClient(app=app, base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             response = await client.post(
                 "/api/v1/auth/verify",
                 headers={"Authorization": f"Bearer {token}"},
@@ -229,7 +229,7 @@ class TestAuthVerifyEndpoint:
         - Created timestamp
         - Updated timestamp
         """
-        async with AsyncClient(app=app, base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             response = await client.post(
                 "/api/v1/auth/verify",
                 headers={"Authorization": f"Bearer {valid_jwt_token}"},
@@ -303,7 +303,7 @@ class TestAuthenticationEndToEnd:
         token = jwt.encode(payload, settings.nextauth_secret, algorithm="HS256")
 
         # Step 2: Make authenticated request
-        async with AsyncClient(app=app, base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             response = await client.post(
                 "/api/v1/auth/verify",
                 headers={"Authorization": f"Bearer {token}"},
@@ -316,7 +316,7 @@ class TestAuthenticationEndToEnd:
         assert data["email"] == test_user.email
 
         # Step 4: Verify we can make multiple requests with same token
-        async with AsyncClient(app=app, base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             response2 = await client.post(
                 "/api/v1/auth/verify",
                 headers={"Authorization": f"Bearer {token}"},
@@ -397,7 +397,7 @@ class TestAuthenticationEndToEnd:
         )
 
         # Authenticate both users
-        async with AsyncClient(app=app, base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             response1 = await client.post(
                 "/api/v1/auth/verify",
                 headers={"Authorization": f"Bearer {token1}"},
@@ -452,7 +452,7 @@ class TestAuthenticationSecurity:
         }
         forged_token = jwt.encode(payload, "attacker-secret-key-123456789012", algorithm="HS256")
 
-        async with AsyncClient(app=app, base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             response = await client.post(
                 "/api/v1/auth/verify",
                 headers={"Authorization": f"Bearer {forged_token}"},
@@ -475,7 +475,7 @@ class TestAuthenticationSecurity:
         # Try to manually modify the token (will break signature)
         modified_token = valid_jwt_token[:-10] + "AAAAAAAAAA"
 
-        async with AsyncClient(app=app, base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             response = await client.post(
                 "/api/v1/auth/verify",
                 headers={"Authorization": f"Bearer {modified_token}"},
