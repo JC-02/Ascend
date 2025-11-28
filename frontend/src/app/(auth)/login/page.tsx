@@ -133,8 +133,6 @@ export default function LoginPage() {
               Continue with GitHub
             </Button>
 
-
-
             {/* New User Info */}
             <p className="px-4 text-center text-xs text-slate-500">
               New to Ascend AI? Creating an account is quick and easy.

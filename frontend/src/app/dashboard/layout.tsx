@@ -14,8 +14,6 @@ import { SidebarNav } from '@/components/layout/sidebar-nav';
 
 // Navigation items moved to sidebar-nav.tsx
 
-
-
 // ...
 
 export default async function ProtectedDashboardLayout({
@@ -25,7 +23,7 @@ export default async function ProtectedDashboardLayout({
 }) {
   // Check for valid session
   const session = await auth();
-  
+
   if (!session?.user) {
     redirect('/login');
   }

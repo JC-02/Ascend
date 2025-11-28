@@ -22,7 +22,6 @@ import { useEffect, useState } from 'react';
 export default function DashboardPage() {
   const { data: session } = useSession();
 
-
   const user = session?.user;
   const firstName = user?.name?.split(' ')[0] || 'there';
 
