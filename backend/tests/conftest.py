@@ -23,9 +23,6 @@ from app.db.models.user import User
 pytest_plugins = []
 
 
-
-
-
 # ============================================
 # Database Fixtures
 # ============================================
