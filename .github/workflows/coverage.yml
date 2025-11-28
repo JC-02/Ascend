@@ -9,6 +9,31 @@ on:
 jobs:
   backend-coverage:
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: test_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+      redis:
+        image: redis:7
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
     defaults:
       run:
         working-directory: ./backend
@@ -46,6 +71,7 @@ jobs:
 
       - name: Run tests with coverage
         run: |
+          alembic upgrade head
           pytest --cov=app --cov-report=xml
 
       - name: Upload coverage to Codecov
