@@ -1,4 +1,4 @@
-Excellent. I will now generate the complete, final, and meticulously detailed MVP development plan, including the previously reviewed epics. This plan is fully aligned with `AscendAI_Canonical_Context.md` (v1.3) and is designed for maximum clarity and zero ambiguity.
+This plan is fully aligned with `AscendAI_System_Context.md` (v1.4) and 'AscendAI_Blueprint.md' (v3.3) and is designed for maximum clarity and zero ambiguity.
 
 Here is the definitive JIRA project plan for the Ascend AI MVP, from start to finish.
 
@@ -209,6 +209,70 @@ Here is the definitive JIRA project plan for the Ascend AI MVP, from start to fi
 ### **EPIC-2: Core Data Ingestion & Session Creation**
 
 **Goal:** Allow a user to upload a resume and job description, which initiates the creation of an interview session. The system must parse the resume, store all data securely, and asynchronously trigger the AI question generation workflow.
+
+---
+
+#### **STORY-2.0: [DevOps] As a Developer, I need a robust CI/CD and Testing infrastructure.**
+
+- **Description:** Establish a comprehensive automated testing and deployment pipeline to ensure code quality, security, and stability before scaling the application.
+- **AC:**
+
+  - AC-1: Backend and Frontend CI pipelines run on every push/PR.
+  - AC-2: Linting, formatting, and type-checking are enforced.
+  - AC-3: Security scans (CodeQL, Dependency Review) are active.
+  - AC-4: End-to-End tests run nightly and on main branch pushes.
+  - AC-5: Test coverage is tracked and reported to Codecov.
+
+- **TASK-2.0.1: Implement Comprehensive CI/CD Pipelines**
+
+  - **Description:** Create GitHub Actions workflows for all aspects of the SDLC.
+  - **Sub-tasks:**
+    - **SUB-2.0.1.1:** Create `ci.yml` with two parallel jobs:
+      - **Backend:** Service containers for Postgres 15 and Redis 7. Steps: Setup Python 3.x, Install dependencies (`requirements.txt`, `pytest`, `httpx`, `psycopg2-binary`), Run `alembic upgrade head`, Run `pytest`.
+      - **Frontend:** Steps: Setup Node.js (cache `npm`), Install dependencies (`npm ci`), Build (`npm run build`), Test (`npm test`).
+    - **SUB-2.0.1.2:** Create `lint.yml` for code quality enforcement:
+      - **Backend:** Runs `ruff check .` and `ruff format --check .`.
+      - **Frontend:** Runs `npm run lint` (ESLint), `npm run format:check` (Prettier), and `npm run type-check` (TypeScript).
+    - **SUB-2.0.1.3:** Create `security.yml` for vulnerability scanning:
+      - **Analyze:** Runs CodeQL analysis for `javascript` and `python`.
+      - **Dependency Review:** Runs `actions/dependency-review-action` on PRs.
+      - **Schedule:** Weekly cron `0 0 * * 0`.
+    - **SUB-2.0.1.4:** Create `docker.yml` to verify container builds:
+      - **Build Images:** Uses `docker/setup-buildx-action`. Builds `backend` and `frontend` contexts. Tags: `ascend-backend:latest`, `ascend-frontend:latest`.
+    - **SUB-2.0.1.5:** Configure `dependabot.yml` for automated dependency updates:
+      - **npm:** Directory `/frontend`, Schedule: Weekly.
+      - **pip:** Directory `/backend`, Schedule: Weekly.
+      - **docker:** Directories `/`, `/frontend`, `/backend`, Schedule: Weekly.
+      - **github-actions:** Directory `/`, Schedule: Weekly.
+
+- **TASK-2.0.2: Implement Backend Testing Infrastructure**
+
+  - **Description:** Set up the testing framework and initial integration tests for the FastAPI backend.
+  - **Sub-tasks:**
+    - **SUB-2.0.2.1:** Configure `pytest` with `pytest-asyncio` and `pytest-cov`.
+    - **SUB-2.0.2.2:** Create `conftest.py` with async test client, database fixtures, and event loop handling.
+    - **SUB-2.0.2.3:** Implement integration tests for core modules (`test_integration.py`, `api/`, `core/`).
+    - **SUB-2.0.2.4:** Create `coverage.yml` to run tests with coverage and upload to Codecov:
+      - **Backend Coverage:** Runs `pytest --cov=app --cov-report=xml`. Uploads to Codecov with flag `backend`.
+
+- **TASK-2.0.3: Implement Frontend Testing Infrastructure**
+  - **Description:** Set up the testing framework and E2E tests for the Next.js frontend.
+  - **Sub-tasks:**
+    - **SUB-2.0.3.1:** Configure Jest and React Testing Library for unit/component testing.
+    - **SUB-2.0.3.2:** Configure Playwright for End-to-End (E2E) testing.
+    - **SUB-2.0.3.3:** Create `e2e.yml` workflow for automated browser testing:
+      - **Schedule:** Nightly `0 0 * * *`.
+      - **Steps:** Install Playwright Browsers, Build App, Run `npm run test:e2e`. Uploads `playwright-report` artifact.
+    - **SUB-2.0.3.4:** Create `coverage.yml` (frontend job) to upload metrics to Codecov:
+      - **Frontend Coverage:** Runs `npm test -- --coverage`. Uploads `coverage/clover.xml` to Codecov with flag `frontend`.
+
+- **TASK-2.0.4: Developer Experience Automation**
+  - **Description:** Create a `Makefile` to simplify common development tasks.
+  - **Sub-tasks:**
+    - **SUB-2.0.4.1:** Implement `make up`, `make down`, `make build`, and `make logs` for Docker Compose management.
+    - **SUB-2.0.4.2:** Implement `make init-minio` to initialize the S3 bucket.
+    - **SUB-2.0.4.3:** Implement `make test-services` to verify Postgres, Redis, and MinIO health.
+    - **SUB-2.0.4.4:** Implement `make migrate`, `make migrate-create`, and `make migrate-down` for Alembic migrations.
 
 ---
 
