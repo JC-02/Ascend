@@ -92,8 +92,8 @@ async def get_current_user(
         cached_user_data["updated_at"] = datetime.fromisoformat(cached_user_data["updated_at"])
 
         user = User(**cached_user_data)
-        # Attach the session to the user for potential lazy-loading
-        session.add(user)
+        # Merge the user into the session to handle state correctly (avoids INSERT on commit)
+        user = await session.merge(user)
         return user
 
     # ============================================

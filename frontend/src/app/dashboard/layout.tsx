@@ -31,12 +31,5 @@ export default async function ProtectedDashboardLayout({
   // Allow guest users to access dashboard
   // They will see prompts to sign in on individual pages
 
-
-  return (
-    <DashboardLayout
-      sidebar={<SidebarNav />}
-    >
-      {children}
-    </DashboardLayout>
-  );
+  return <DashboardLayout sidebar={<SidebarNav />}>{children}</DashboardLayout>;
 }

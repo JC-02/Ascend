@@ -5,9 +5,9 @@
 // DIRECTIVE: DIR-009 (TypeScript Best Practices)
 // ============================================
 
-import { DefaultSession } from "next-auth";
+import { DefaultSession } from 'next-auth';
 
-declare module "next-auth" {
+declare module 'next-auth' {
   /**
    * Extends the built-in session.user type
    * Adds the database user ID to the session
@@ -15,7 +15,7 @@ declare module "next-auth" {
   interface Session {
     user: {
       id: string; // Database user ID (UUID)
-    } & DefaultSession["user"];
+    } & DefaultSession['user'];
   }
 
   /**
@@ -26,7 +26,7 @@ declare module "next-auth" {
   }
 }
 
-declare module "next-auth/jwt" {
+declare module 'next-auth/jwt' {
   /**
    * Extends the built-in JWT type
    */

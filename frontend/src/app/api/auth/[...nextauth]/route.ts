@@ -6,7 +6,7 @@
 // DIRECTIVE: DIR-008 (Zero Trust Security Protocol)
 // ============================================
 
-import { handlers } from "@/lib/auth";
+import { handlers } from '@/lib/auth';
 
 // Export the NextAuth handlers for GET and POST requests
 // This handles all NextAuth routes under /api/auth/*

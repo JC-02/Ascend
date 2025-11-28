@@ -16,7 +16,7 @@ interface HeaderProps {
 
 /**
  * Header Component - Top Navigation Bar
- * 
+ *
  * Features:
  * - Centered navigation with equal-width buttons
  * - Custom logo with border
@@ -38,7 +38,8 @@ export function Header({ className }: HeaderProps) {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const hasSidebar = pathname.startsWith('/dashboard') ||
+  const hasSidebar =
+    pathname.startsWith('/dashboard') ||
     pathname.startsWith('/resumes') ||
     pathname.startsWith('/sessions') ||
     pathname.startsWith('/settings');
@@ -46,32 +47,32 @@ export function Header({ className }: HeaderProps) {
   return (
     <header
       className={cn(
-        'sticky top-4 z-50 w-[95%] max-w-7xl mx-auto rounded-full transition-all duration-300',
+        'sticky top-4 z-50 mx-auto w-[95%] max-w-7xl rounded-full transition-all duration-300',
         'border border-white/10 shadow-lg',
         isScrolled
-          ? 'bg-background/80 backdrop-blur-xl shadow-primary/5 supports-[backdrop-filter]:bg-background/60 top-4'
-          : 'bg-transparent backdrop-blur-sm border-transparent shadow-none top-0 w-full rounded-none max-w-full',
+          ? 'top-4 bg-background/80 shadow-primary/5 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60'
+          : 'top-0 w-full max-w-full rounded-none border-transparent bg-transparent shadow-none backdrop-blur-sm',
         className
       )}
     >
       <div className="container">
         <div className="flex h-16 items-center justify-between">
           {/* Left: Logo + Mobile Toggle */}
-          <div className="flex items-center gap-4 flex-shrink-0 w-[200px]">
+          <div className="flex w-[200px] flex-shrink-0 items-center gap-4">
             {hasSidebar && (
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={toggleSidebar}
-                className="md:hidden hover:bg-accent"
+                className="hover:bg-accent md:hidden"
                 aria-label="Toggle sidebar"
               >
                 <Menu className="h-5 w-5" />
               </Button>
             )}
 
-            <Link href="/" className="flex items-center space-x-3 group">
-              <div className="relative h-10 w-10 rounded-lg overflow-hidden border-2 border-primary/20 group-hover:border-primary/40 transition-all shimmer">
+            <Link href="/" className="group flex items-center space-x-3">
+              <div className="shimmer relative h-10 w-10 overflow-hidden rounded-lg border-2 border-primary/20 transition-all group-hover:border-primary/40">
                 <Image
                   src="/ascend-logo.png"
                   alt="Ascend AI"
@@ -88,7 +89,7 @@ export function Header({ className }: HeaderProps) {
 
           {/* Center: Navigation (only on public pages) - Centered on middle button */}
           {!hasSidebar && (
-            <nav className="hidden md:flex items-center justify-center absolute left-1/2 -translate-x-1/2">
+            <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center justify-center md:flex">
               <div className="flex items-center gap-2">
                 <Link href="/features">
                   <Button
@@ -122,7 +123,7 @@ export function Header({ className }: HeaderProps) {
           )}
 
           {/* Right: Auth buttons or User menu */}
-          <div className="flex items-center gap-2 flex-shrink-0 w-[200px] justify-end">
+          <div className="flex w-[200px] flex-shrink-0 items-center justify-end gap-2">
             {hasSidebar ? (
               <UserMenu />
             ) : (
@@ -133,7 +134,7 @@ export function Header({ className }: HeaderProps) {
                   </Button>
                 </Link>
                 <Link href="/login">
-                  <Button size="sm" className="bg-primary hover:bg-primary/90 glow">
+                  <Button size="sm" className="glow bg-primary hover:bg-primary/90">
                     Get Started
                   </Button>
                 </Link>

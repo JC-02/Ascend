@@ -19,9 +19,9 @@ export default function TestLayoutPage() {
   return (
     <div className="min-h-screen">
       {/* Page Header */}
-      <div className="border-b mb-8">
+      <div className="mb-8 border-b">
         <div className="container py-6">
-          <h1 className="text-3xl font-bold mb-2">Layout Components Test</h1>
+          <h1 className="mb-2 text-3xl font-bold">Layout Components Test</h1>
           <p className="text-muted-foreground">Testing Task 1.3.2 components</p>
         </div>
       </div>
@@ -34,10 +34,11 @@ export default function TestLayoutPage() {
             <CardDescription>Fixed navigation bar at the top</CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground mb-4">
-              The header is visible at the top of this page. Scroll down to see the background change on scroll.
+            <p className="mb-4 text-sm text-muted-foreground">
+              The header is visible at the top of this page. Scroll down to see the background
+              change on scroll.
             </p>
-            <ul className="list-disc list-inside text-sm space-y-1 text-muted-foreground">
+            <ul className="list-inside list-disc space-y-1 text-sm text-muted-foreground">
               <li>✅ Logo links to home</li>
               <li>✅ Responsive mobile menu toggle (on small screens)</li>
               <li>✅ User menu on right side (avatar)</li>
@@ -61,7 +62,7 @@ export default function TestLayoutPage() {
               <span className="text-sm font-medium">Standalone test:</span>
               <UserMenu />
             </div>
-            <ul className="list-disc list-inside text-sm space-y-1 text-muted-foreground mt-4">
+            <ul className="mt-4 list-inside list-disc space-y-1 text-sm text-muted-foreground">
               <li>✅ Shows user name and email</li>
               <li>✅ Profile link</li>
               <li>✅ Settings link</li>
@@ -80,17 +81,15 @@ export default function TestLayoutPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              Click the button below to test the mobile menu overlay (alternative navigation pattern):
+              Click the button below to test the mobile menu overlay (alternative navigation
+              pattern):
             </p>
             <Button onClick={() => setMobileMenuOpen(true)} className="w-full sm:w-auto">
               <Menu className="mr-2 h-4 w-4" />
               Open Mobile Menu
             </Button>
-            <MobileMenu
-              isOpen={mobileMenuOpen}
-              onClose={() => setMobileMenuOpen(false)}
-            />
-            <ul className="list-disc list-inside text-sm space-y-1 text-muted-foreground mt-4">
+            <MobileMenu isOpen={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
+            <ul className="mt-4 list-inside list-disc space-y-1 text-sm text-muted-foreground">
               <li>✅ Full-screen overlay</li>
               <li>✅ Slide-in animation from right</li>
               <li>✅ Navigation links with icons</li>
@@ -114,7 +113,7 @@ export default function TestLayoutPage() {
             <p className="text-sm text-muted-foreground">
               The breadcrumb above shows: Home → Dashboard → Test Layout
             </p>
-            <ul className="list-disc list-inside text-sm space-y-1 text-muted-foreground">
+            <ul className="list-inside list-disc space-y-1 text-sm text-muted-foreground">
               <li>✅ Clickable parent links</li>
               <li>✅ Current page highlighted</li>
               <li>✅ Chevron separators</li>
@@ -131,10 +130,10 @@ export default function TestLayoutPage() {
             <CardDescription>Bottom footer with links and information</CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground mb-4">
+            <p className="mb-4 text-sm text-muted-foreground">
               Scroll to the bottom of the page to see the footer component with:
             </p>
-            <ul className="list-disc list-inside text-sm space-y-1 text-muted-foreground">
+            <ul className="list-inside list-disc space-y-1 text-sm text-muted-foreground">
               <li>✅ Brand section with tagline</li>
               <li>✅ Product links column</li>
               <li>✅ Company links column</li>
@@ -153,10 +152,10 @@ export default function TestLayoutPage() {
             <CardDescription>Full page layout wrapper for public pages</CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground mb-4">
+            <p className="mb-4 text-sm text-muted-foreground">
               This page demonstrates the complete layout system. The MainLayout component includes:
             </p>
-            <ul className="list-disc list-inside text-sm space-y-1 text-muted-foreground">
+            <ul className="list-inside list-disc space-y-1 text-sm text-muted-foreground">
               <li>✅ Header at top (sticky positioning)</li>
               <li>✅ Main content area (this section)</li>
               <li>✅ Footer at bottom</li>
@@ -174,13 +173,13 @@ export default function TestLayoutPage() {
             <CardDescription>Dashboard-specific layout with sidebar</CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground mb-4">
+            <p className="mb-4 text-sm text-muted-foreground">
               To test the DashboardLayout (with sidebar), visit the dashboard page:
             </p>
             <Button asChild>
               <a href="/dashboard">Go to Dashboard</a>
             </Button>
-            <ul className="list-disc list-inside text-sm space-y-1 text-muted-foreground mt-4">
+            <ul className="mt-4 list-inside list-disc space-y-1 text-sm text-muted-foreground">
               <li>✅ Includes collapsible sidebar</li>
               <li>✅ Mobile-responsive sidebar toggle</li>
               <li>✅ Active route highlighting</li>
@@ -244,7 +243,7 @@ export default function TestLayoutPage() {
         </Card>
 
         {/* Spacer for scroll testing */}
-        <div className="h-96 flex items-center justify-center border rounded-lg">
+        <div className="flex h-96 items-center justify-center rounded-lg border">
           <p className="text-muted-foreground">Scroll up to see header background change</p>
         </div>
       </div>
